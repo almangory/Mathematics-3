@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>كتاب الرياضيات التفاعلي</title>
+    <script>
+      // منع ظهور إنذارات غير مرغوب فيها في البيئة التجريبية بخصوص خطأ الاتصال بـ WebSocket/HMR
+      (function() {
+        // كتم وإيقاف معالجة الخطأ غير الملتقط لـ WebSocket لمنع ظهور النافذة الحمراء المزعجة للطفل
+        window.addEventListener('unhandledrejection', function(event) {
+          if (event.reason && (
+            event.reason.message === 'WebSocket closed without opened.' ||
+            (typeof event.reason === 'string' && event.reason.includes('WebSocket')) ||
+            (event.reason.message && event.reason.message.includes('WebSocket'))
+          )) {
+            event.preventDefault();
+            event.stopPropagation();
+          }
+        }, true);
+
+        window.addEventListener('error', function(event) {
+          if (event.message && (
+            event.message.includes('WebSocket') ||
+            event.message.includes('vite')
+          )) {
+            event.preventDefault();
+            event.stopPropagation();
+          }
+        }, true);
+
+        // اعتراض وتطهير مشغّل السوكيت (WebSocket) لمنع محاولة الاتصال بالخادم الموقوف فيه ميزة Hmr
+        const OriginalWebSocket = window.WebSocket;
+        if (OriginalWebSocket) {
+          window.WebSocket = function(url, protocols) {
+            if (url && (url.includes('vite') || url.includes('hmr') || url.includes('localhost') || url.includes('127.0.0.1'))) {
+              console.log('Substituting silent dummy WebSocket for Vite HMR to prevent console errors.');
+              return {
+                url: url,
+                readyState: 0, // CONNECTING (يبقى متصلاً بشكل وهمي هادئ لمنع الخطأ)
+                send: function() {},
+                close: function() {},
+                addEventListener: function(type, callback) {
+                  // لا نطلق أي حدث لمنع حدوث خطأ أو إغلاق
+                },
+                removeEventListener: function() {},
+                dispatchEvent: function() { return true; }
+              };
+            }
+            return new OriginalWebSocket(url, protocols);
+          };
+          Object.setPrototypeOf(window.WebSocket, OriginalWebSocket);
+          window.WebSocket.prototype = OriginalWebSocket.prototype;
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+

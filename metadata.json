@@ -1,0 +1,6 @@
+{
+  "name": "الرياضيات الصف الثالث - السودان",
+  "description": "منصة تفاعلية مشوقة لأطفال الصف الثالث الابتدائي لدراسة كتاب الرياضيات السوداني من خلال الألعاب والتحديات",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
