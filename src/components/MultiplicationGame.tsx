@@ -24,11 +24,15 @@ export default function MultiplicationGame({ onBack, onAddStars }: Multiplicatio
   const [isGameOver, setIsGameOver] = useState<boolean>(false);
   const [isWin, setIsWin] = useState<boolean>(false);
   const [balloonFloating, setBalloonFloating] = useState<boolean>(true);
+  const [answeredVal, setAnsweredVal] = useState<number | null>(null);
+  const [isAnswerCorrect, setIsAnswerCorrect] = useState<boolean | null>(null);
 
   // Generate a customized question based on the chosen textbook level
   const generateQuestion = (currentLevel: number) => {
     setShowHint(false);
     setBalloonFloating(true);
+    setAnsweredVal(null);
+    setIsAnswerCorrect(null);
 
     let num1 = 1;
     let num2 = 1;
@@ -119,15 +123,28 @@ export default function MultiplicationGame({ onBack, onAddStars }: Multiplicatio
   }, [level]);
 
   const handlePop = (selected: number) => {
-    if (!question) return;
+    if (!question || answeredVal !== null) return;
+    setAnsweredVal(selected);
+    const correct = selected === question.answer;
+    setIsAnswerCorrect(correct);
 
-    if (selected === question.answer) {
+    if (correct) {
       soundEffects.playPop();
-      setScore(prev => prev + 10);
+    } else {
+      soundEffects.playError();
+    }
+  };
+
+  const handleProceedNext = () => {
+    if (!question || isAnswerCorrect === null) return;
+
+    if (isAnswerCorrect) {
+      const newScore = score + 10;
+      setScore(newScore);
       onAddStars(2);
 
       // Check for level up
-      if (score + 10 >= 50) {
+      if (newScore >= 50) {
         if (level < 5) {
           soundEffects.playStar();
           setLevel(prev => prev + 1);
@@ -140,7 +157,6 @@ export default function MultiplicationGame({ onBack, onAddStars }: Multiplicatio
         generateQuestion(level);
       }
     } else {
-      soundEffects.playError();
       setLives(prev => {
         const nextLives = prev - 1;
         if (nextLives <= 0) {
@@ -148,7 +164,9 @@ export default function MultiplicationGame({ onBack, onAddStars }: Multiplicatio
         }
         return nextLives;
       });
-      generateQuestion(level);
+      if (lives - 1 > 0) {
+        generateQuestion(level);
+      }
     }
   };
 
@@ -283,7 +301,7 @@ export default function MultiplicationGame({ onBack, onAddStars }: Multiplicatio
             </div>
 
             {/* Level Goal gauge */}
-            <div className="w-full max-w-lg bg-gray-100 h-4 rounded-full overflow-hidden mb-12 border border-gray-200 relative">
+            <div className="w-full max-w-lg bg-gray-100 h-4 rounded-full overflow-hidden mb-6 border border-gray-200 relative">
               <div 
                 className="bg-sky-500 h-full transition-all duration-500" 
                 style={{ width: `${(score / 50) * 100}%` }}
@@ -293,22 +311,54 @@ export default function MultiplicationGame({ onBack, onAddStars }: Multiplicatio
               </span>
             </div>
 
+            {answeredVal !== null && (
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className={`w-full max-w-lg p-5 mb-8 rounded-3xl border-2 text-right ${
+                  isAnswerCorrect 
+                    ? 'bg-emerald-50 border-emerald-300 text-emerald-900' 
+                    : 'bg-rose-50 border-rose-300 text-rose-900'
+                }`}
+                dir="rtl"
+              >
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-2xl">{isAnswerCorrect ? '🎉' : '❌'}</span>
+                  <span className="font-black">
+                    {isAnswerCorrect ? 'إجابة عبقرية صحيحة!' : 'إجابة تحتاج لتركيز يا بطل!'}
+                  </span>
+                </div>
+                <p className="text-xs font-semibold leading-relaxed mb-4 text-gray-700">
+                  {isAnswerCorrect 
+                    ? `أحسنت القول! حاصل ضرب ${question.text} هو بالفعل ${question.answer}. تم فرقعة البالون بنجاح!`
+                    : `البالون الصحيح كان يحمل الرقم ${question.answer}. دعنا نتدرب جيداً لنصيب الهدف في المرة القادمة!`
+                  }
+                </p>
+                <button
+                  onClick={handleProceedNext}
+                  className="bg-sky-500 hover:bg-sky-600 text-white px-8 py-3 rounded-2xl text-xs font-black shadow-md hover:shadow-lg transition-transform active:scale-95 flex items-center gap-1"
+                >
+                  استمر للسؤال التالي ➡️
+                </button>
+              </motion.div>
+            )}
+
             {/* The Floating Balloons (Interactive) */}
             <div className="flex justify-around w-full max-w-2xl px-4 py-8 bg-sky-50/40 rounded-3xl border-2 border-dashed border-sky-100 min-h-60 relative overflow-hidden">
               {question.options.map((val, idx) => (
                 <motion.div
                   key={val + '-' + idx}
                   initial={{ y: 200, opacity: 0 }}
-                  animate={{ y: [20, -20, 20], opacity: 1 }}
+                  animate={{ y: answeredVal !== null ? (answeredVal === val ? 300 : [100, 100]) : [20, -20, 20], opacity: answeredVal !== null ? (answeredVal === val ? 0 : 0.4) : 1 }}
                   transition={{
                     y: {
-                      repeat: Infinity,
+                      repeat: answeredVal !== null ? 0 : Infinity,
                       duration: 3 + idx * 0.5,
                       ease: 'easeInOut',
                     },
                     opacity: { duration: 0.5 }
                   }}
-                  className="flex flex-col items-center relative group cursor-pointer"
+                  className={`flex flex-col items-center relative group ${answeredVal !== null ? 'pointer-events-none' : 'cursor-pointer'}`}
                   onClick={() => handlePop(val)}
                 >
                   {/* Balloon Body */}

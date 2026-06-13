@@ -8,6 +8,7 @@ import FractionLab from './components/FractionLab';
 import ClockGame from './components/ClockGame';
 import GeometryGame from './components/GeometryGame';
 import AiTutor from './components/AiTutor';
+import ExamsGame from './components/ExamsGame';
 import { soundEffects } from './utils/audio';
 import { Trophy, Star, Sparkles, BookOpen, GraduationCap, ChevronLeft, Volume2 } from 'lucide-react';
 
@@ -89,6 +90,13 @@ export default function App() {
               className="mt-3 bg-[#6C63FF] text-white px-6 py-3 rounded-2xl text-sm font-black shadow-[0_6px_0_#5249cf] hover:shadow-[0_4px_0_#5249cf] active:translate-y-1 active:shadow-none transition-all w-full flex items-center justify-center gap-1"
             >
               💬 اسأل حسون بالذكاء الاصطناعي
+            </button>
+
+            <button 
+              onClick={() => handleNavigate('exams')}
+              className="mt-3 bg-gradient-to-r from-amber-500 to-yellow-500 text-white px-6 py-3.5 rounded-2xl text-sm font-black shadow-[0_6px_0_#9a3412] hover:shadow-[0_4px_0_#9a3412] active:translate-y-1 active:shadow-none transition-all w-full flex items-center justify-center gap-1.5 animate-pulse"
+            >
+              🏆 صالة الامتحانات والاختبارات الكبرى
             </button>
           </div>
         </div>
@@ -256,6 +264,8 @@ export default function App() {
         return <GeometryGame onBack={() => handleNavigate('dashboard')} onAddStars={addStars} />;
       case 'tutor':
         return <AiTutor onBack={() => handleNavigate('dashboard')} onAddStars={addStars} />;
+      case 'exams':
+        return <ExamsGame onBack={() => handleNavigate('dashboard')} onAddStars={addStars} />;
       default:
         return renderDashboard();
     }

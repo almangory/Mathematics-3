@@ -135,7 +135,9 @@ export default function GeometryGame({ onBack, onAddStars }: GeometryGameProps) 
       onAddStars(2);
     } else {
       soundEffects.playError();
-      setMatchFeedback(`للأسف، هذا الرسم لا يعبّر عن (${name}). حاول اختيار اسم هندسي آخر متطابق!`);
+      const actualShape = shapesList.find(s => s.id === shapeId);
+      const actualName = actualShape ? actualShape.name : '';
+      setMatchFeedback(`للأسف، هذا الرسم لا يعبّر عن (${name}). هذا الرسم يمتلك اسماً صحيحاً وهو: (${actualName})! حاول المطابقة مجدداً.`);
       setSelectedShape(null);
       setSelectedMatchName(null);
     }
@@ -152,7 +154,7 @@ export default function GeometryGame({ onBack, onAddStars }: GeometryGameProps) 
     } else {
       soundEffects.playError();
       setIsDefSuccess(false);
-      setDefFeedback('إجابة غير صحيحة. اقرأ شروط الشكل وأضلاعه لتحدد نوعه الصحيح.');
+      setDefFeedback(`للأسف، إجابة غير صحيحة. الإجابة الإلزامية الصحيحة هي: (${q.ans}). اقرأ شروط الشكل وأضلاعه لتحدد نوعه الصحيح وتثبت معلوماتك.`);
     }
   };
 

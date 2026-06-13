@@ -55,7 +55,13 @@ export default function AbacusGame({ onBack, onAddStars }: AbacusGameProps) {
     } else {
       soundEffects.playError();
       setIsSuccess(false);
-      setMessage('أوه، حاول مرة أخرى! تذكر أن تطابق كل رقم مع عموده ومكانه المناسب.');
+      
+      const targetTh = Math.floor(targetNumber / 1000);
+      const targetH = Math.floor((targetNumber % 1000) / 100);
+      const targetT = Math.floor((targetNumber % 100) / 10);
+      const targetU = targetNumber % 10;
+
+      setMessage(`أوه، الإجابة غير دقيقة! العدد المستهدف هو ${targetNumber}، وتمثيله الصحيح: [ألوف = ${targetTh}، مئات = ${targetH}، عشرات = ${targetT}، آحاد = ${targetU}]. اضبط الخانات وصحح العداد!`);
     }
   };
 

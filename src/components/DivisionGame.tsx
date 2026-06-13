@@ -129,7 +129,7 @@ export default function DivisionGame({ onBack, onAddStars }: DivisionGameProps) 
     } else {
       soundEffects.playError();
       setOpStatus('fail');
-      setOpFeedback(`أوه! حاول مجدداً. ${q.isDiv ? 'القسمة' : 'الضرب'} دائماً تسبق ${q.type === '+' ? 'الجمع' : 'الطرح'}! احسب الطرف الثاني أولاً!`);
+      setOpFeedback(`أوه! الإجابة غير صحيحة. الإجابة الإلزامية الصحيحة هي [ ${q.ans} ]. تذكر أن ${q.isDiv ? 'القسمة' : 'الضرب'} دائماً تسبق الحسابات الأخرى! ${q.exp}`);
     }
   };
 

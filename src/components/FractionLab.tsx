@@ -171,7 +171,8 @@ export default function FractionLab({ onBack, onAddStars }: FractionLabProps) {
     } else {
       soundEffects.playError();
       setCompSuccess(false);
-      setCompFeedback('أوه! الإشارة غير موفقة. تذكر مقارنة الحصص أو حجم القطع لتجد الجواب الصحيح.');
+      const opArabic = compCorrect === '>' ? 'أكبر من' : compCorrect === '<' ? 'أصغر من' : 'يساوي';
+      setCompFeedback(`أوه! الإشارة غير صحيحة. الإشارة الصحيحة هي [ ${compCorrect} ] (أي أن الكسر الأول هو ${opArabic} الكسر الثاني). تذكر مقارنة الحصص أو حجم القطع لتجد الجواب الصحيح.`);
     }
   };
 
