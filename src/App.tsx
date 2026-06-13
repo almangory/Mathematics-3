@@ -89,7 +89,7 @@ export default function App() {
               onClick={() => handleNavigate('tutor')}
               className="mt-3 bg-[#6C63FF] text-white px-6 py-3 rounded-2xl text-sm font-black shadow-[0_6px_0_#5249cf] hover:shadow-[0_4px_0_#5249cf] active:translate-y-1 active:shadow-none transition-all w-full flex items-center justify-center gap-1"
             >
-              💬 اسأل حسون بالذكاء الاصطناعي
+              📚 ابحث بداخل كتاب حسون الذكي
             </button>
 
             <button 

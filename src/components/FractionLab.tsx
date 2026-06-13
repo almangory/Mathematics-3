@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { ArrowLeft, Trophy, Sparkles, HelpCircle, Check, Play, RefreshCw, Star } from 'lucide-react';
+import { ArrowLeft, Trophy, Sparkles, HelpCircle, Check, Play, RefreshCw, Star, AlertCircle, Lightbulb, Volume2, CheckCircle2 } from 'lucide-react';
 import { soundEffects } from '../utils/audio';
 
 interface FractionLabProps {
@@ -9,19 +9,18 @@ interface FractionLabProps {
 }
 
 export default function FractionLab({ onBack, onAddStars }: FractionLabProps) {
-  const [subTab, setSubTab] = useState<'create' | 'match' | 'compare'>('create');
+  const [selectedLesson, setSelectedLesson] = useState<number>(1);
   const [stars, setStars] = useState(0);
 
-  // Creator state
+  // Creator & Matcher state
   const [pizzaSlices, setPizzaSlices] = useState(8); // Denominator
   const [coloredSlices, setColoredSlices] = useState<boolean[]>(Array(8).fill(false));
 
-  // Matcher state
   const [matchDenominator, setMatchDenominator] = useState(6);
   const [matchRequired, setMatchRequired] = useState(3); // Match numerator
   const [matchUserSlices, setMatchUserSlices] = useState<boolean[]>(Array(6).fill(false));
   const [matchFeedback, setMatchFeedback] = useState('');
-  const [showMatchSuccess, setShowMatchSuccess] = useState(false);
+  const [matchStatus, setMatchStatus] = useState<'idle' | 'success' | 'fail'>('idle');
 
   // Comparer state
   const [compNum1, setCompNum1] = useState(1);
@@ -30,12 +29,21 @@ export default function FractionLab({ onBack, onAddStars }: FractionLabProps) {
   const [compDen2, setCompDen2] = useState(4);
   const [compCorrect, setCompCorrect] = useState<'<' | '>' | '='>('>');
   const [compFeedback, setCompFeedback] = useState('');
-  const [compSuccess, setCompSuccess] = useState<boolean | null>(null);
+  const [compStatus, setCompStatus] = useState<'idle' | 'success' | 'fail'>('idle');
 
-  // Initialize match question
+  const lessons = [
+    { id: 1, title: 'الدرس ١: تمثيل الكسر ومفهوم البسط والمقام', desc: 'تلوين قطع الكيك الدائري والبيتزا لفهم بسط ومقام الكسور.', page: 'كتاب ص ٧٢-٧٥' },
+    { id: 2, title: 'الدرس ٢: تلوين الأجزاء ومطابقة الكسر المطلوب', desc: 'تلوين أجزاء مساوية تماماً للكسر الكلي واستنباط الأشكال.', page: 'كتاب ص ٧٧' },
+    { id: 3, title: 'الدرس ٣: مقارنة الحصص والكسور والترتيب', desc: 'مقارنة الكسور ذات المقامات المتساوية أو البسوط المتساوية.', page: 'كتاب ص ٨٤-٨٧' },
+  ];
+
   useEffect(() => {
-    generateMatchQuestion();
-  }, [subTab]);
+    if (selectedLesson === 2) {
+      generateMatchQuestion();
+    } else if (selectedLesson === 3) {
+      generateComparison();
+    }
+  }, [selectedLesson]);
 
   const generateMatchQuestion = () => {
     const denominators = [4, 6, 8, 10, 12];
@@ -45,54 +53,33 @@ export default function FractionLab({ onBack, onAddStars }: FractionLabProps) {
     setMatchRequired(num);
     setMatchUserSlices(Array(den).fill(false));
     setMatchFeedback('مرحباً بك! قم بتلوين الأجزاء لنحصل على الكسر المطلوب.');
-    setShowMatchSuccess(false);
+    setMatchStatus('idle');
   };
 
-  // Convert fraction numerator/denominator directly to standard Arabic written names
   const fractionToWords = (num: number, den: number): string => {
     if (num === 0) return 'صفر';
-    if (num === den) return 'الواحد الصحيح (كل الكتل دائرية)';
+    if (num === den) return 'الواحد الصحيح';
     
-    // Simple basic unit fractions (p.75)
     if (num === 1) {
-      if (den === 2) return 'النصف';
-      if (den === 3) return 'الثلث';
-      if (den === 4) return 'الربع';
-      if (den === 5) return 'الخمس';
-      if (den === 6) return 'السدس';
-      if (den === 7) return 'السبع';
-      if (den === 8) return 'الثمن';
-      if (den === 9) return 'التسع';
-      if (den === 10) return 'العشر';
+      if (den === 2) return 'النصف (١/٢)';
+      if (den === 3) return 'الثلث (١/٣)';
+      if (den === 4) return 'الربع (١/٤)';
+      if (den === 5) return 'الخمس (١/٥)';
+      if (den === 6) return 'السدس (١/٦)';
+      if (den === 8) return 'الثمن (١/٨)';
+      if (den === 10) return 'العشر (١/١٠)';
       return `جزء واحد من أصل ${den}`;
     }
 
     if (num === 2) {
-      if (den === 3) return 'ثلثان';
-      if (den === 4) return 'ربعان (أو نصف)';
-      if (den === 5) return 'خمسان';
-      if (den === 6) return 'سدسان';
-      if (den === 8) return 'ثمنان';
-      if (den === 10) return 'عشران';
+      if (den === 3) return 'ثلثان (٢/٣)';
+      if (den === 4) return 'ربعان (٢/٤)';
+      if (den === 5) return 'خمسان (٢/٥)';
+      if (den === 6) return 'سدسان (٢/٦)';
+      if (den === 8) return 'ثمنان (٢/٨)';
     }
 
-    // Standard plurals for textbook
-    const plurals: Record<number, string> = {
-      2: 'أجزاء',
-      3: 'أرباع',
-      4: 'أرباع',
-      5: 'أخماس',
-      6: 'أسداس',
-      7: 'أسباع',
-      8: 'أثمان',
-      9: 'أتساع',
-      10: 'أعشار',
-      12: 'أجزاء من اثني عشر',
-    };
-
-    const numbersMap = ['', 'واحد', 'اثنان', 'ثلاثة', 'أربعة', 'خمسة', 'ستة', 'سبعة', 'ثمانية', 'تسعة', 'عشرة', 'أحد عشر'];
-    const p = plurals[den] || 'أجزاء';
-    return `${numbersMap[num]} ${p}`;
+    return `${num} أجزاء من أصل ${den}`;
   };
 
   const handleSliceClickCreator = (idx: number) => {
@@ -106,48 +93,75 @@ export default function FractionLab({ onBack, onAddStars }: FractionLabProps) {
 
   const handleSliceClickMatcher = (idx: number) => {
     soundEffects.playBeep();
+    if (matchStatus === 'success') return;
     setMatchUserSlices(prev => {
       const copy = [...prev];
       copy[idx] = !copy[idx];
       return copy;
     });
+    setMatchStatus('idle');
   };
 
   const handleVerifyMatch = () => {
     const userCount = matchUserSlices.filter(Boolean).length;
     if (userCount === matchRequired) {
       soundEffects.playStar();
-      setShowMatchSuccess(true);
+      setMatchStatus('success');
       setMatchFeedback('إجابة عبقرية! لقد نجحت في تلوين الكسر المطلوب بشكل دقيق، خذ نجمتك المضيئة! ⭐');
       setStars(prev => prev + 1);
       onAddStars(5);
     } else {
       soundEffects.playError();
-      setShowMatchSuccess(false);
-      setMatchFeedback(`للاسف، القيمة غير مطابقة. أنت لونت ${userCount} أجزاء من أصل ${matchDenominator}، والمطلوب تلوينُ ${matchRequired} أجزاء تماماً.`);
+      setMatchStatus('fail');
     }
+  };
+
+  const handleVerifyComparison = (operator: '<' | '>' | '=') => {
+    if (operator === compCorrect) {
+      soundEffects.playStar();
+      setCompStatus('success');
+      setCompFeedback(`إجابة صحيحة يا بطل! 🌟 البرهان: ${fractionToWords(compNum1, compDen1)} مقارنة مع ${fractionToWords(compNum2, compDen2)}. والبرهان: الكسر الأول هو ${operator === '>' ? 'أكبر من' : operator === '<' ? 'أصغر من' : 'يساوي'} الكسر الثاني.`);
+      setStars(prev => prev + 1);
+      onAddStars(5);
+    } else {
+      soundEffects.playError();
+      setCompStatus('fail');
+    }
+  };
+
+  const handleApplyMatchCorrection = () => {
+    soundEffects.playStar();
+    const correctedArray = Array(matchDenominator).fill(false);
+    for (let i = 0; i < matchRequired; i++) {
+      correctedArray[i] = true;
+    }
+    setMatchUserSlices(correctedArray);
+    setMatchStatus('success');
+    setMatchFeedback(`تطبيق تلقائي: قمنا بتلوين ${matchRequired} أجزاء من أصل ${matchDenominator} ليمثل كسر المطابقة بشكل صحيح.`);
+    speakText(`قمنا بتلوينِ ${matchRequired} أجزاء من أصل ${matchDenominator} وهو يقرأ ${fractionToWords(matchRequired, matchDenominator)}.`);
+  };
+
+  const handleApplyCompCorrection = () => {
+    soundEffects.playStar();
+    setCompStatus('success');
+    setCompFeedback(`تطبيق تلقائي: الإشارة الصحيحة هي [ ${compCorrect} ].`);
+    speakText(`الإشارة الصائبة والمنهجية هي ${compCorrect === '>' ? 'أكبر من' : compCorrect === '<' ? 'أصغر من' : 'يساوي'}.`);
   };
 
   const activeNumeratorCreator = coloredSlices.filter(Boolean).length;
 
-  // Handles updating denominator in Creator
   const handleDenominatorCreatorChange = (val: number) => {
     soundEffects.playBeep();
     setPizzaSlices(val);
     setColoredSlices(Array(val).fill(false));
   };
 
-  // Comparer Level generator
-  useEffect(() => {
-    generateComparison();
-  }, [subTab]);
-
   const generateComparison = () => {
     const list = [
-      { n1: 1, d1: 2, n2: 1, d2: 4, ans: '>' as const, exp: 'عندما يتساوى البسط (١ و ١)، فإن الجزء صاحب المقام الأصغر يكون هو الأكبر! نصف البيتزا دائماً أكبر من ربعها!' },
+      { n1: 1, d1: 2, n2: 1, d2: 4, ans: '>' as const, exp: 'عندما يتساوى البسط (١ و ١)، فإن الكسر صاحب المقام الأصغر (٢) يكون هو الأكبر! نصف البيتزا دائماً أكبر من ربعها!' },
       { n1: 1, d1: 3, n2: 1, d2: 6, ans: '>' as const, exp: 'الثلث أكبر من السدس لأن الجزء مقسم على ٣ أشخاص فقط، بينما السدس مقسم على ٦ أشخاص!' },
       { n1: 3, d1: 8, n2: 5, d2: 8, ans: '<' as const, exp: 'عندما يتساوى المقام (٨ و ٨)، نقوم بمقارنة البسط بشكل اعتيادي؛ وبما أن ٣ أصغر من ٥، فكسر ٣ على ٨ أصغر من ٥ على ٨.' },
-      { n1: 4, d1: 6, n2: 2, d1_val: 4, d2: 6, ans: '>' as const, exp: 'بما أن لهما نفس المقامات المتساوية (٦)، وبما أن ٤ أكبر من ٢، فكسر ٤ على ٦ أكبر من ٢ على ٦.' },
+      { n1: 4, d1: 6, n2: 2, d2: 6, ans: '>' as const, exp: 'بما أن لهما نفس المقامات المتساوية (٦)، وبما أن ٤ أكبر من ٢، فكسر ٤ على ٦ أكبر من ٢ على ٦.' },
       { n1: 1, d1: 8, n2: 1, d2: 5, ans: '<' as const, exp: 'المقام الأكبر (٨) يجعل القطعة الواحدة أصغر بكثير من القطعة المشتركة على ٥ أشخاص.' },
       { n1: 2, d1: 4, n2: 1, d2: 2, ans: '=' as const, exp: 'ربعان من البيتزا يعادلان نصف البيتزا تماماً! هذان كسران متكافئان لضرب أو قسمة الطرفين بـ ٢.' }
     ];
@@ -157,337 +171,519 @@ export default function FractionLab({ onBack, onAddStars }: FractionLabProps) {
     setCompNum2(pick.n2);
     setCompDen2(pick.d2);
     setCompCorrect(pick.ans);
+    setCompStatus('idle');
     setCompFeedback('اختر الإشارة الصحيحة للحصول على النجمة!');
-    setCompSuccess(null);
   };
 
-  const handleVerifyComparison = (operator: '<' | '>' | '=') => {
-    if (operator === compCorrect) {
-      soundEffects.playStar();
-      setCompSuccess(true);
-      setCompFeedback(`إجابة صحيحة يا بطل! 🌟 تفسير حسون: ${fractionToWords(compNum1, compDen1)} مقارنة مع ${fractionToWords(compNum2, compDen2)}. والبرهان: ${operator === '>' ? 'أكبر من' : operator === '<' ? 'أصغر من' : 'يساوي'} بوضوح.`);
-      setStars(prev => prev + 1);
-      onAddStars(5);
-    } else {
-      soundEffects.playError();
-      setCompSuccess(false);
-      const opArabic = compCorrect === '>' ? 'أكبر من' : compCorrect === '<' ? 'أصغر من' : 'يساوي';
-      setCompFeedback(`أوه! الإشارة غير صحيحة. الإشارة الصحيحة هي [ ${compCorrect} ] (أي أن الكسر الأول هو ${opArabic} الكسر الثاني). تذكر مقارنة الحصص أو حجم القطع لتجد الجواب الصحيح.`);
+  const speakText = (text: string) => {
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'ar-SD';
+      window.speechSynthesis.speak(utterance);
     }
   };
 
+  const matchUserCount = matchUserSlices.filter(Boolean).length;
+
   return (
-    <div className="max-w-4xl mx-auto bg-white rounded-3xl shadow-xl overflow-hidden border-4 border-rose-400">
+    <div className="max-w-6xl mx-auto bg-white rounded-3xl shadow-xl overflow-hidden border-4 border-rose-400 text-right" dir="rtl">
+      
       {/* Top Banner */}
-      <div className="bg-gradient-to-r from-rose-400 to-rose-500 p-6 flex items-center justify-between text-white">
+      <div className="bg-gradient-to-r from-rose-400 to-rose-500 p-6 flex flex-col sm:flex-row items-center justify-between text-white gap-4">
         <button 
           onClick={onBack}
-          className="flex items-center gap-2 bg-rose-600/30 hover:bg-rose-600/50 p-2 px-4 rounded-full transition-all text-sm font-bold"
+          className="flex items-center gap-2 bg-rose-600/30 hover:bg-rose-600/50 p-2 px-4 rounded-full transition-all text-sm font-bold self-start sm:self-auto animate-pulse"
         >
-          <ArrowLeft className="w-5 h-5" /> رجوع للمطالعة
+          <ArrowLeft className="w-5 h-5 ml-1" /> رجوع للمدينة
         </button>
-        <h2 className="text-2xl font-bold flex items-center gap-2">
+        <h2 className="text-2xl font-black flex items-center gap-2">
           🍕 مختبر الكسور وتلوين البيتزا
         </h2>
-        <div className="flex items-center gap-2 bg-rose-600 bg-opacity-30 px-4 py-1.5 rounded-full">
-          <Trophy className="w-5 h-5 text-yellow-300" />
-          <span className="font-bold">{stars} ⭐</span>
+        <div className="flex items-center gap-2 bg-rose-600 bg-opacity-30 px-4 py-1.5 rounded-full font-bold text-sm">
+          <Trophy className="w-5 h-5 text-yellow-300 ml-1" />
+          <span>{stars} نجوم الكسور ⭐</span>
         </div>
       </div>
 
       <div className="p-6">
-        {/* Toggle Sections Buttons */}
-        <div className="flex justify-center gap-4 mb-6">
-          <button
-            onClick={() => { soundEffects.playBeep(); setSubTab('create'); }}
-            className={`px-6 py-2.5 rounded-full font-bold transition-all transform hover:scale-105 ${
-              subTab === 'create' 
-                ? 'bg-rose-500 text-white shadow-lg' 
-                : 'bg-rose-100 text-rose-700 hover:bg-rose-200'
-            }`}
-          >
-            🍕 استكشاف الكسور وتلوينها
-          </button>
-          <button
-            onClick={() => { soundEffects.playBeep(); setSubTab('match'); }}
-            className={`px-6 py-2.5 rounded-full font-bold transition-all transform hover:scale-105 ${
-              subTab === 'match' 
-                ? 'bg-rose-500 text-white shadow-lg' 
-                : 'bg-rose-100 text-rose-700 hover:bg-rose-200'
-            }`}
-          >
-            🎯 تحدّي الكسر المطلوب
-          </button>
-          <button
-            onClick={() => { soundEffects.playBeep(); setSubTab('compare'); }}
-            className={`px-6 py-2.5 rounded-full font-bold transition-all transform hover:scale-105 ${
-              subTab === 'compare' 
-                ? 'bg-rose-500 text-white shadow-lg' 
-                : 'bg-rose-100 text-rose-700 hover:bg-rose-200'
-            }`}
-          >
-            ⚖️ مقارنة الحصص والكسور
-          </button>
+        
+        {/* Lesson choices */}
+        <div className="bg-rose-50 rounded-2xl p-4 border border-rose-200 mb-6">
+          <h3 className="text-xs font-black text-rose-850 mb-2">🎈 اختر أحد دروس وحدة الكسور للمطالعة والحل التفاعلي:</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            {lessons.map(les => (
+              <button
+                key={les.id}
+                onClick={() => {
+                  soundEffects.playBeep();
+                  setSelectedLesson(les.id);
+                  setMatchStatus('idle');
+                  setCompStatus('idle');
+                }}
+                className={`p-3 rounded-xl border-2 text-right transition-all flex flex-col justify-between ${
+                  selectedLesson === les.id
+                    ? 'bg-rose-500 text-white border-rose-600 shadow-md transform scale-[1.01]'
+                    : 'bg-white text-gray-700 border-rose-100 hover:border-rose-300 hover:bg-rose-100/30'
+                }`}
+              >
+                <div>
+                  <strong className="text-xs font-black block">{les.title}</strong>
+                  <span className="text-[10px] leading-relaxed block mt-1 opacity-90">{les.desc}</span>
+                </div>
+                <span className={`text-[9px] mt-2 font-bold inline-block p-0.5 px-2 rounded self-start ${
+                  selectedLesson === les.id ? 'bg-rose-600 text-white' : 'bg-rose-50 text-rose-700'
+                }`}>
+                  {les.page}
+                </span>
+              </button>
+            ))}
+          </div>
         </div>
 
-        {subTab === 'create' && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center bg-rose-50/30 p-6 rounded-3xl border-2 border-rose-100">
-            {/* Pizza visualizer */}
-            <div className="flex flex-col items-center">
-              <div className="relative w-64 h-64 rounded-full border-8 border-yellow-700 bg-orange-100 shadow-2xl flex items-center justify-center overflow-hidden">
-                {/* SVG splitting circle into matching pizza slices */}
-                <svg className="absolute inset-0 w-full h-full transform rotate-3" viewBox="0 0 200 200">
-                  {/* Iterate slice angles */}
-                  {Array.from({ length: pizzaSlices }).map((_, idx) => {
-                    const angle = 360 / pizzaSlices;
-                    const startAngle = idx * angle;
-                    const endAngle = (idx + 1) * angle;
+        {/* Dynamic Split holding playboard & correction assistant sidebar */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          
+          {/* Active play board */}
+          <div className={`${
+            (selectedLesson === 2 && matchStatus === 'fail') || (selectedLesson === 3 && compStatus === 'fail')
+              ? 'lg:col-span-8'
+              : 'lg:col-span-12'
+          } space-y-6 transition-all`}>
+            
+            {/* Lesson 1: Concept Constructor */}
+            {selectedLesson === 1 && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center bg-rose-50/20 p-6 rounded-3xl border-2 border-rose-100">
+                <div className="flex flex-col items-center">
+                  <div className="relative w-64 h-64 rounded-full border-8 border-yellow-700 bg-orange-100 shadow-2xl flex items-center justify-center overflow-hidden">
+                    <svg className="absolute inset-0 w-full h-full transform rotate-3" viewBox="0 0 200 200">
+                      {Array.from({ length: pizzaSlices }).map((_, idx) => {
+                        const angle = 360 / pizzaSlices;
+                        const startAngle = idx * angle;
+                        const endAngle = (idx + 1) * angle;
 
-                    const rad1 = (startAngle - 90) * (Math.PI / 180);
-                    const rad2 = (endAngle - 90) * (Math.PI / 180);
+                        const rad1 = (startAngle - 90) * (Math.PI / 180);
+                        const rad2 = (endAngle - 90) * (Math.PI / 180);
 
-                    const x1 = 100 + 100 * Math.cos(rad1);
-                    const y1 = 100 + 100 * Math.sin(rad1);
-                    const x2 = 100 + 100 * Math.cos(rad2);
-                    const y2 = 100 + 100 * Math.sin(rad2);
+                        const x1 = 100 + 100 * Math.cos(rad1);
+                        const y1 = 100 + 100 * Math.sin(rad1);
+                        const x2 = 100 + 100 * Math.cos(rad2);
+                        const y2 = 100 + 100 * Math.sin(rad2);
 
-                    const largeArc = angle > 180 ? 1 : 0;
-                    const d = `M 100 100 L ${x1} ${y1} A 100 100 0 ${largeArc} 1 ${x2} ${y2} Z`;
+                        const largeArc = angle > 180 ? 1 : 0;
+                        const d = `M 100 100 L ${x1} ${y1} A 100 100 0 ${largeArc} 1 ${x2} ${y2} Z`;
 
-                    return (
-                      <path
-                        key={idx}
-                        d={d}
-                        onClick={() => handleSliceClickCreator(idx)}
-                        className={`cursor-pointer transition-all duration-300 stroke-yellow-700 stroke-2 ${
-                          coloredSlices[idx] 
-                            ? 'fill-amber-500 hover:fill-amber-400' 
-                            : 'fill-amber-100 hover:fill-amber-200'
-                        }`}
-                      />
-                    );
-                  })}
-                </svg>
+                        return (
+                          <path
+                            key={idx}
+                            d={d}
+                            onClick={() => handleSliceClickCreator(idx)}
+                            className={`cursor-pointer transition-all duration-300 stroke-yellow-700 stroke-2 ${
+                              coloredSlices[idx] 
+                                ? 'fill-amber-500 hover:fill-amber-400' 
+                                : 'fill-amber-100 hover:fill-amber-200'
+                            }`}
+                          />
+                        );
+                      })}
+                    </svg>
+                    <div className="z-10 bg-white/90 rounded-full p-2 px-4 text-[10px] font-black text-amber-800 shadow">
+                      انقر لتلوين الأجزاء! 🍕
+                    </div>
+                  </div>
 
-                {/* Draw dotted line markers for help */}
-                <div className="absolute inset-0 pointer-events-none rounded-full border-4 border-dashed border-yellow-600 border-opacity-40" />
+                  <div className="mt-8 flex flex-col items-center gap-2">
+                    <span className="text-xs font-bold text-gray-500">اختر عدد الأجزاء الكلية للبيتزا (المقام):</span>
+                    <div className="flex flex-wrap justify-center gap-2">
+                      {[2, 3, 4, 5, 6, 8, 10, 12].map((val) => (
+                        <button
+                          key={val}
+                          onClick={() => handleDenominatorCreatorChange(val)}
+                          className={`w-10 h-10 rounded-xl font-black text-sm transition-transform active:scale-90 ${
+                            pizzaSlices === val ? 'bg-rose-500 text-white shadow-md' : 'bg-rose-100 text-rose-700 hover:bg-rose-200/50'
+                          }`}
+                        >
+                          {val}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
 
-                {/* Slices label centered inside pizza */}
-                <div className="z-10 bg-white/90 backdrop-blur-sm rounded-full p-2 px-3 text-[10px] font-black text-amber-800 shadow">
-                  انقر لتلوين الأجزاء!
+                <div className="space-y-4">
+                  <div className="bg-white p-5 rounded-3xl border border-rose-100 shadow-sm space-y-3">
+                    <h4 className="text-xs font-black text-rose-800 border-b pb-2">📊 قراءة قيمة هذا الكسر:</h4>
+                    <div className="flex justify-center items-center gap-4 py-2 border-b border-rose-50">
+                      <div className="flex flex-col items-center justify-center font-black text-2xl text-rose-900">
+                        <span>{activeNumeratorCreator}</span>
+                        <div className="w-10 h-1 bg-rose-900 rounded my-1" />
+                        <span>{pizzaSlices}</span>
+                      </div>
+                      <span className="text-xs text-slate-400">البسط الملون على المقام الكلي</span>
+                    </div>
+
+                    <div className="text-sm font-extrabold text-slate-700">
+                      مسمى الكسر: <span className="text-rose-600 underline">{fractionToWords(activeNumeratorCreator, pizzaSlices)}</span>
+                    </div>
+
+                    <p className="text-[11px] leading-relaxed text-slate-500 pt-1">
+                      الكسر يعلمنا كيف نقسم قطعة خبز أو بيتزا بالعدل بالتساوي بين الأصدقاء!
+                    </p>
+                  </div>
+
+                  <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex gap-2">
+                    <span className="text-2xl">🦜</span>
+                    <div>
+                      <strong className="text-[11px] text-amber-800 block font-black">تعريف بخت الرضا ص ٧٣:</strong>
+                      <p className="text-[10.5px] leading-relaxed text-slate-750 mt-1 font-semibold">
+                        الكسر هو جزء أو أجزاء متساوية من الواحد الكلي. نكتب الجزء المأخوذ أعلى الخط الكسري ونسميه (البسط)، والأجزاء الكلية نقسمها بأسفل الخط ونسميها (المقام).
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </div>
+            )}
 
-              {/* Adjust Slices slider/buttons */}
-              <div className="mt-8 flex flex-col items-center gap-2">
-                <span className="text-xs font-bold text-gray-500">اختر عدد أجزاء الكسر (المقام):</span>
-                <div className="flex gap-2">
-                  {[2, 3, 4, 5, 6, 8, 10, 12].map((val) => (
-                    <button
-                      key={val}
-                      onClick={() => handleDenominatorCreatorChange(val)}
-                      className={`w-10 h-10 rounded-xl font-black text-sm transition-transform active:scale-90 ${
-                        pizzaSlices === val ? 'bg-rose-500 text-white shadow-md' : 'bg-rose-100 text-rose-700'
-                      }`}
+            {/* Lesson 2: Matcher */}
+            {selectedLesson === 2 && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center bg-rose-50/20 p-6 rounded-3xl border-2 border-rose-100">
+                <div className="flex flex-col items-center">
+                  <div className="relative w-64 h-64 rounded-full border-8 border-yellow-700 bg-orange-100 shadow-2xl flex items-center justify-center overflow-hidden">
+                    <svg className="absolute inset-0 w-full h-full transform rotate-3" viewBox="0 0 200 200">
+                      {Array.from({ length: matchDenominator }).map((_, idx) => {
+                        const angle = 360 / matchDenominator;
+                        const startAngle = idx * angle;
+                        const endAngle = (idx + 1) * angle;
+
+                        const rad1 = (startAngle - 90) * (Math.PI / 180);
+                        const rad2 = (endAngle - 90) * (Math.PI / 180);
+
+                        const x1 = 100 + 100 * Math.cos(rad1);
+                        const y1 = 100 + 100 * Math.sin(rad1);
+                        const x2 = 100 + 100 * Math.cos(rad2);
+                        const y2 = 100 + 100 * Math.sin(rad2);
+
+                        const largeArc = angle > 180 ? 1 : 0;
+                        const d = `M 100 100 L ${x1} ${y1} A 100 100 0 ${largeArc} 1 ${x2} ${y2} Z`;
+
+                        return (
+                          <path
+                            key={idx}
+                            d={d}
+                            onClick={() => handleSliceClickMatcher(idx)}
+                            className={`cursor-pointer transition-all duration-300 stroke-yellow-700 stroke-2 ${
+                              matchUserSlices[idx] 
+                                ? 'fill-amber-500 hover:fill-amber-400' 
+                                : 'fill-amber-100 hover:fill-amber-200'
+                            }`}
+                          />
+                        );
+                      })}
+                    </svg>
+                    <div className="z-10 bg-white/95 rounded-full p-2 px-4 shadow text-[10px] font-black text-amber-800">
+                      لون القطع بالضغط! 🍕
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="bg-slate-800 rounded-2xl p-5 text-center border-4 border-amber-900 shadow-md">
+                    <div className="text-[10px] text-emerald-400 mb-1 font-black">تحدي تلوين الكسر المطلوب:</div>
+                    <span className="text-xs text-slate-300 font-bold block">مطلوب تلوين حصة تكافئ:</span>
+                    <strong className="text-4xl text-white font-extrabold block my-2 font-mono">
+                      {matchRequired} / {matchDenominator}
+                    </strong>
+                    <span className="text-[11px] text-amber-200 font-semibold block">
+                      أي كسر: {fractionToWords(matchRequired, matchDenominator)}
+                    </span>
+                  </div>
+
+                  <div className="bg-white p-5 rounded-2xl border border-rose-100 space-y-4">
+                    <div className="flex justify-between items-center text-xs">
+                      <span className="text-slate-500 font-bold">تلوينك الحالي:</span>
+                      <strong className="text-rose-700 font-black text-sm">{matchUserCount} من {matchDenominator} قطعة</strong>
+                    </div>
+
+                    {matchStatus !== 'success' && (
+                      <button
+                        onClick={handleVerifyMatch}
+                        className="w-full py-3 bg-rose-500 hover:bg-rose-600 text-white font-black text-xs rounded-xl shadow transition-all active:scale-95"
+                      >
+                        تحقق من تلوينك للكسر الآن! ⭐
+                      </button>
+                    )}
+                  </div>
+
+                  {matchStatus === 'success' && (
+                    <motion.div
+                      initial={{ scale: 0.95, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      className="bg-emerald-50 border-4 border-emerald-400 p-4 rounded-2xl text-center space-y-2"
                     >
-                      {val}
-                    </button>
-                  ))}
+                      <span className="text-3xl">🎉🍕⭐</span>
+                      <p className="text-xs font-black text-emerald-800 leading-relaxed">{matchFeedback}</p>
+                      <button
+                        onClick={generateMatchQuestion}
+                        className="px-6 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white font-black text-[10px] rounded-full inline-block"
+                      >
+                        العب تحدياً تالياً للكسور 🔄
+                      </button>
+                    </motion.div>
+                  )}
                 </div>
               </div>
-            </div>
+            )}
 
-            {/* Explanation card */}
-            <div className="space-y-4">
-              <div className="bg-white rounded-3xl p-6 border-4 border-rose-100 shadow text-right">
-                <h3 className="text-xl font-black text-rose-800 mb-2">🎓 لوحة تفاصيل الكسر:</h3>
-                <p className="text-gray-600 text-sm mb-4 leading-relaxed">
-                  تعلّمنا في الصفحة <strong>٧٨ من كتاب الرياضيات</strong> أن الكسر يتكون من بسط ومقام. جرب تلوين الأجزاء بالدائرة لتلاحظ التغيّرات:
-                </p>
+            {/* Lesson 3: Comparing Fractions */}
+            {selectedLesson === 3 && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center bg-rose-50/20 p-6 rounded-3xl border-2 border-rose-100">
+                <div className="flex flex-col gap-6 items-center">
+                  
+                  {/* Two comparative visualizer pizzas */}
+                  <div className="flex justify-center gap-4 w-full">
+                    
+                    {/* Pizza 1 */}
+                    <div className="flex flex-col items-center bg-white p-3 rounded-2xl border border-rose-100 w-1/2">
+                      <span className="text-[10px] font-black text-slate-500 mb-1">البيتزا الأولى:</span>
+                      <div className="relative w-28 h-28 rounded-full border-4 border-yellow-700 bg-orange-100 overflow-hidden">
+                        <svg className="absolute inset-0 w-full h-full transform" viewBox="0 0 200 200">
+                          {Array.from({ length: compDen1 }).map((_, idx) => {
+                            const angle = 360 / compDen1;
+                            const startAngle = idx * angle;
+                            const endAngle = (idx + 1) * angle;
 
-                {/* Animated math formula card */}
-                <div className="flex flex-col items-center justify-center py-6 bg-rose-50 rounded-2xl border border-rose-200 my-4 max-w-sm mx-auto">
-                  {/* Numerator */}
-                  <div className="flex flex-col items-center">
-                    <span className="text-xs font-bold text-rose-600">البسط (كم قطعة لونّاها)</span>
-                    <span className="text-4xl font-black text-rose-800 animate-pulse">{activeNumeratorCreator}</span>
-                  </div>
+                            const rad1 = (startAngle - 90) * (Math.PI / 180);
+                            const rad2 = (endAngle - 90) * (Math.PI / 180);
 
-                  {/* Fraction line */}
-                  <div className="w-24 h-1.5 bg-yellow-800 rounded-full my-3" />
+                            const x1 = 100 + 100 * Math.cos(rad1);
+                            const y1 = 100 + 100 * Math.sin(rad1);
+                            const x2 = 100 + 100 * Math.cos(rad2);
+                            const y2 = 100 + 100 * Math.sin(rad2);
 
-                  {/* Denominator */}
-                  <div className="flex flex-col items-center">
-                    <span className="text-4xl font-black text-amber-850">{pizzaSlices}</span>
-                    <span className="text-xs font-bold text-amber-700">المقام (مجموع الأجزاء متساوية بالمطبخ)</span>
+                            const d = `M 100 100 L ${x1} ${y1} A 100 100 0 ${angle > 180 ? 1 : 0} 1 ${x2} ${y2} Z`;
+
+                            return (
+                              <path
+                                key={idx}
+                                d={d}
+                                className={`stroke-yellow-700 stroke-2 ${idx < compNum1 ? 'fill-amber-500' : 'fill-amber-100'}`}
+                              />
+                            );
+                          })}
+                        </svg>
+                      </div>
+                      <strong className="text-base text-rose-900 mt-2 font-mono">{compNum1} / {compDen1}</strong>
+                      <span className="text-[9px] text-gray-400 block text-center">({fractionToWords(compNum1, compDen1)})</span>
+                    </div>
+
+                    {/* Pizza 2 */}
+                    <div className="flex flex-col items-center bg-white p-3 rounded-2xl border border-rose-100 w-1/2">
+                      <span className="text-[10px] font-black text-slate-500 mb-1">البيتزا الثانية:</span>
+                      <div className="relative w-28 h-28 rounded-full border-4 border-yellow-700 bg-orange-100 overflow-hidden">
+                        <svg className="absolute inset-0 w-full h-full transform" viewBox="0 0 200 200">
+                          {Array.from({ length: compDen2 }).map((_, idx) => {
+                            const angle = 360 / compDen2;
+                            const startAngle = idx * angle;
+                            const endAngle = (idx + 1) * angle;
+
+                            const rad1 = (startAngle - 90) * (Math.PI / 180);
+                            const rad2 = (endAngle - 90) * (Math.PI / 180);
+
+                            const x1 = 100 + 100 * Math.cos(rad1);
+                            const y1 = 100 + 100 * Math.sin(rad1);
+                            const x2 = 100 + 100 * Math.cos(rad2);
+                            const y2 = 100 + 100 * Math.sin(rad2);
+
+                            const d = `M 100 100 L ${x1} ${y1} A 100 100 0 ${angle > 180 ? 1 : 0} 1 ${x2} ${y2} Z`;
+
+                            return (
+                              <path
+                                key={idx}
+                                d={d}
+                                className={`stroke-yellow-700 stroke-2 ${idx < compNum2 ? 'fill-amber-500' : 'fill-amber-100'}`}
+                              />
+                            );
+                          })}
+                        </svg>
+                      </div>
+                      <strong className="text-base text-rose-900 mt-2 font-mono">{compNum2} / {compDen2}</strong>
+                      <span className="text-[9px] text-gray-400 block text-center">({fractionToWords(compNum2, compDen2)})</span>
+                    </div>
+
                   </div>
                 </div>
 
-                <div className="text-center font-bold text-rose-900 border-t border-rose-100 pt-4 text-lg">
-                  💡 الكسر بالكلمات: <span className="underline underline-offset-4 text-emerald-600 font-extrabold">{fractionToWords(activeNumeratorCreator, pizzaSlices)}</span>
+                <div className="space-y-4">
+                  <div className="bg-slate-800 rounded-2xl p-5 text-center border-4 border-amber-900">
+                    <span className="text-[10px] text-amber-300 font-bold block mb-1">مقارنة الحصص والرموز ص ٨٤:</span>
+                    <p className="text-xs text-white leading-relaxed">
+                      اختر الرمز الصحيح للمقارنة بين حصتي الكسرين في البيتزا بالأعلى:
+                    </p>
+                    <div className="flex justify-center items-center gap-2 mt-3 font-mono font-black text-xl text-amber-140">
+                      <span>{compNum1}/{compDen1}</span>
+                      <span className="bg-slate-700 p-1 px-3 rounded text-rose-400">؟</span>
+                      <span>{compNum2}/{compDen2}</span>
+                    </div>
+                  </div>
+
+                  <div className="bg-white p-4 rounded-xl border border-slate-100 flex justify-center gap-3">
+                    {['>', '<', '='].map((op) => (
+                      <button
+                        key={op}
+                        onClick={() => handleVerifyComparison(op as any)}
+                        className="w-12 h-12 bg-rose-500 hover:bg-rose-600 text-white font-black text-lg rounded-xl shadow-md transition-transform active:scale-90"
+                      >
+                        {op}
+                      </button>
+                    ))}
+                  </div>
+
+                  {compStatus === 'success' && (
+                    <motion.div
+                      initial={{ scale: 0.95, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      className="bg-emerald-50 border-4 border-emerald-400 p-4 rounded-2xl text-center text-emerald-900 text-xs font-bold leading-relaxed space-y-2"
+                    >
+                      <span className="text-2xl">👏⚖️🌟</span>
+                      <p>{compFeedback}</p>
+                      <button
+                        onClick={generateComparison}
+                        className="px-6 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white font-black text-[9.5px] rounded-full inline-block mt-2"
+                      >
+                        تحدّي تالٍ في المقارنة 🔄
+                      </button>
+                    </motion.div>
+                  )}
                 </div>
               </div>
-            </div>
+            )}
+
           </div>
-        )}
 
-        {subTab === 'match' && (
-          <div className="bg-amber-50/30 p-6 rounded-3xl border-2 border-amber-100 text-center max-w-2xl mx-auto">
-            {/* Story challenge top header */}
-            <div className="bg-amber-50 rounded-2xl p-4 border border-amber-200 mb-6 flex items-start gap-4 text-right">
-              <span className="text-5xl animate-spin">🦜</span>
-              <div>
-                <h4 className="font-black text-amber-800 mb-1">تحدّي تلوين الكسر المطلوب:</h4>
-                <p className="text-amber-700 text-sm leading-relaxed mb-3">
-                  مرحباً يا ذكي! يطلب منك حسون مساعدة حيوانات المدرسة الغابة. هل يمكنك تلوين البيتزا لتمثيل هذا الكسر؟
-                </p>
-                <div className="inline-block bg-white border-2 border-amber-400 rounded-2xl p-3 font-black text-3xl text-amber-900 tracking-wide px-10">
-                  {matchRequired} / {matchDenominator}
-                </div>
-                <span className="block text-gray-500 font-bold text-xs mt-1">({fractionToWords(matchRequired, matchDenominator)})</span>
-              </div>
-            </div>
-
-            {/* Pizza Match Slices */}
-            <div className="flex items-center justify-center relative w-60 h-64 mx-auto overflow-hidden">
-              <div className="relative w-56 h-56 rounded-full border-8 border-rose-700 bg-orange-100 shadow-xl flex items-center justify-center overflow-hidden">
-                <svg className="absolute inset-0 w-full h-full transform rotate-12" viewBox="0 0 200 200">
-                  {Array.from({ length: matchDenominator }).map((_, idx) => {
-                    const angle = 360 / matchDenominator;
-                    const startAngle = idx * angle;
-                    const endAngle = (idx + 1) * angle;
-
-                    const rad1 = (startAngle - 90) * (Math.PI / 180);
-                    const rad2 = (endAngle - 90) * (Math.PI / 180);
-
-                    const x1 = 100 + 100 * Math.cos(rad1);
-                    const y1 = 100 + 100 * Math.sin(rad1);
-                    const x2 = 100 + 100 * Math.cos(rad2);
-                    const y2 = 100 + 100 * Math.sin(rad2);
-
-                    const largeArc = angle > 180 ? 1 : 0;
-                    const d = `M 100 100 L ${x1} ${y1} A 100 100 0 ${largeArc} 1 ${x2} ${y2} Z`;
-
-                    return (
-                      <path
-                        key={idx}
-                        d={d}
-                        onClick={() => handleSliceClickMatcher(idx)}
-                        className={`cursor-pointer transition-all duration-300 stroke-rose-700 stroke-2 ${
-                          matchUserSlices[idx] 
-                            ? 'fill-sky-500 hover:fill-sky-400 animate-pulse' 
-                            : 'fill-amber-100 hover:fill-amber-200'
-                        }`}
-                      />
-                    );
-                  })}
-                </svg>
-              </div>
-            </div>
-
-            <div className="text-gray-500 font-bold mt-2 text-sm">
-              أنت لونت حالياً: {matchUserSlices.filter(Boolean).length} أجزاء من {matchDenominator}
-            </div>
-
-            {/* Interaction Buttons details */}
-            <div className="flex flex-col items-center gap-4 mt-6">
-              <button
-                onClick={handleVerifyMatch}
-                className="px-8 py-3 bg-amber-500 hover:bg-amber-600 text-white font-black rounded-full shadow-lg transition-transform active:scale-95"
+          {/* Corrective Assistant Side Panel when fail */}
+          <AnimatePresence>
+            {((selectedLesson === 2 && matchStatus === 'fail') || (selectedLesson === 3 && compStatus === 'fail')) && (
+              <motion.div
+                initial={{ transform: 'translateX(50px)', opacity: 0 }}
+                animate={{ transform: 'translateX(0)', opacity: 1 }}
+                exit={{ transform: 'translateX(50px)', opacity: 0 }}
+                className="lg:col-span-4 bg-rose-50 border-4 border-rose-300 p-5 rounded-3xl space-y-4 shadow-lg flex flex-col justify-between text-right"
               >
-                تحقق من الكسر الملوّن! ✅
-              </button>
+                
+                {/* Match Failure info */}
+                {selectedLesson === 2 && (
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-2 text-rose-800">
+                      <AlertCircle className="w-5 h-5 shrink-0" />
+                      <h4 className="text-xs font-black">مصحح الكسور والمطابقة التفاعلي:</h4>
+                    </div>
 
-              {matchFeedback && (
-                <div className={`p-4 rounded-xl text-sm max-w-md mx-auto leading-relaxed border-2 ${
-                  showMatchSuccess ? 'bg-emerald-100 border-emerald-400 text-emerald-800' : 'bg-rose-100 border-rose-400 text-rose-800'
-                }`}>
-                  {matchFeedback}
-                </div>
-              )}
+                    <p className="text-slate-650 text-[11px] leading-relaxed font-bold">
+                      أوه، تلوينك غير متطابق! الكسر الذي تلوّنه يمثّل بالصيغة <span className="text-rose-600 font-extrabold">{matchUserCount} / {matchDenominator}</span>، بينما الكسر المطلوب بالتحديد هو <span className="text-emerald-750 font-black text-sm">{matchRequired} / {matchDenominator}</span>!
+                    </p>
 
-              {showMatchSuccess && (
-                <button
-                  onClick={generateMatchQuestion}
-                  className="flex items-center gap-1.5 bg-emerald-500 hover:bg-emerald-600 text-white font-bold p-3 px-6 rounded-full shadow text-sm transition-transform active:scale-95"
-                >
-                  <RefreshCw className="w-4 h-4" /> العب تحدٍ جديد!
-                </button>
-              )}
-            </div>
-          </div>
-        )}
+                    <div className="bg-white rounded-2xl p-3 border border-rose-100 space-y-2 text-[11px] font-bold text-slate-700 leading-relaxed">
+                      <span className="text-[10px] text-slate-450 font-black border-b pb-1 block">شرح المدرس حسون بالمنظومة:</span>
+                      <div>- المقام هو <span className="text-rose-600">{matchDenominator}</span>: هذا يعني كعكة البيتزا مقسمة كجسم لـ {matchDenominator} قطع متساوية.</div>
+                      <div>- البسط المطلوب هو <span className="text-emerald-700">{matchRequired}</span>: يعني يجب أن نلون بقطعة الجبن والزعتر {matchRequired} أجزاء منها بالتحديد.</div>
+                      <div className="bg-amber-50 p-1.5 rounded text-amber-800 text-[10px] my-1 text-center font-bold">
+                        تذكر: لون {matchRequired} قطع فقط!
+                      </div>
+                    </div>
 
-        {subTab === 'compare' && (
-          <div className="bg-sky-50/20 p-6 rounded-3xl border-2 border-sky-100 text-center max-w-2xl mx-auto">
-            <h3 className="text-xl font-black text-sky-800 mb-2">⚖️ ميزان المقارنة:</h3>
-            <p className="text-gray-500 text-sm mb-6 max-w-lg mx-auto leading-relaxed">
-              تعلّمنا في الصفحة <strong>٨٩ من كتاب الرياضيات للصف الثالث</strong> أنه كلما زاد عدد الحصص المطروقة (المقام)، تصغر حصة الفرد تدريجياً! هل تتذكر؟ جرب وضع علامة المقارنة المناسبة:
-            </p>
+                    <div className="space-y-2 border-t pt-3">
+                      <button
+                        onClick={handleApplyMatchCorrection}
+                        className="w-full py-2.5 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-black text-xs rounded-xl shadow transition-transform active:scale-95 flex items-center justify-center gap-1"
+                      >
+                         طبّق الكسر الصحيح وتعلّم 🍕
+                      </button>
 
-            {/* Comparison Cards representational box */}
-            <div className="flex justify-around items-center max-w-lg mx-auto py-8 bg-white rounded-3xl border-2 border-sky-100 p-4 shadow-xl">
-              {/* Left Fraction Card */}
-              <div className="flex flex-col items-center p-4 bg-sky-50 rounded-2xl border border-sky-200 w-24">
-                <span className="text-4xl font-black text-sky-800">{compNum1}</span>
-                <div className="w-16 h-1 bg-yellow-800 rounded-full my-2" />
-                <span className="text-4xl font-black text-gray-800">{compDen1}</span>
-                <span className="text-[10px] text-gray-500 mt-2 font-bold">({fractionToWords(compNum1, compDen1)})</span>
-              </div>
+                      <button
+                        onClick={() => speakText(`أوه يا بطل، عدد القطع التلوينية التي اخترتها هي ${matchUserCount} من أصل ${matchDenominator}، ولكن الكسر الأصلي المطلوب تلوينه يتطلب منك تلوينُ ${matchRequired} قطع تماماً. هيا نضغط زر تطبيق الحل لتشاهد الكسر الصحيح وتفهمه!`)}
+                        className="w-full py-1.5 bg-white text-rose-700 font-extrabold text-[10px] rounded-xl border border-rose-250 flex items-center justify-center gap-1 hover:bg-rose-100 transition-colors"
+                      >
+                        🗣️ استمع للشرح الصوتي للكسر المطلوب
+                      </button>
 
-              {/* Operator Placeholders */}
-              <div className="flex flex-col gap-2">
-                <button
-                  onClick={() => handleVerifyComparison('>')}
-                  className="w-16 h-12 bg-amber-400 hover:bg-amber-500 text-amber-900 font-extrabold text-2xl rounded-2xl shadow active:scale-90 transition-transform"
-                >
-                  &gt;
-                </button>
-                <button
-                  onClick={() => handleVerifyComparison('<')}
-                  className="w-16 h-12 bg-amber-400 hover:bg-amber-500 text-amber-900 font-extrabold text-2xl rounded-2xl shadow active:scale-90 transition-transform"
-                >
-                  &lt;
-                </button>
-                <button
-                  onClick={() => handleVerifyComparison('=')}
-                  className="w-16 h-12 bg-amber-400 hover:bg-amber-500 text-amber-900 font-extrabold text-2xl rounded-2xl shadow active:scale-90 transition-transform"
-                >
-                  =
-                </button>
-              </div>
+                      <button
+                        onClick={generateMatchQuestion}
+                        className="w-full py-1 bg-slate-100 hover:bg-slate-200 text-slate-650 text-[10px] font-bold rounded-xl text-center"
+                      >
+                        تخطى إلى كسر تالٍ ➡️
+                      </button>
+                    </div>
 
-              {/* Right Fraction Card */}
-              <div className="flex flex-col items-center p-4 bg-sky-50 rounded-2xl border border-sky-200 w-24">
-                <span className="text-4xl font-black text-sky-800">{compNum2}</span>
-                <div className="w-16 h-1 bg-yellow-800 rounded-full my-2" />
-                <span className="text-4xl font-black text-gray-800">{compDen2}</span>
-                <span className="text-[10px] text-gray-500 mt-2 font-bold">({fractionToWords(compNum2, compDen2)})</span>
-              </div>
-            </div>
+                  </div>
+                )}
 
-            {/* Evaluated results options */}
-            <div className="flex flex-col items-center gap-4 mt-6">
-              {compFeedback && (
-                <div className={`p-4 rounded-xl text-right text-sm leading-relaxed max-w-md mx-auto border-2 ${
-                  compSuccess === null ? 'bg-sky-50 border-sky-200 text-sky-800' : compSuccess ? 'bg-emerald-100 border-emerald-400 text-emerald-800' : 'bg-rose-100 border-rose-400 text-rose-800'
-                }`}>
-                  {compFeedback}
-                </div>
-              )}
+                {/* Compare Failure info */}
+                {selectedLesson === 3 && (
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-2 text-rose-800">
+                      <AlertCircle className="w-5 h-5 shrink-0" />
+                      <h4 className="text-xs font-black">مصحح مقارنة الكسور:</h4>
+                    </div>
 
-              {compSuccess && (
-                <button
-                  onClick={generateComparison}
-                  className="flex items-center gap-1.5 bg-sky-500 hover:bg-sky-600 text-white font-bold p-2 px-6 rounded-full shadow text-sm transition-transform active:scale-95"
-                >
-                  <RefreshCw className="w-4 h-4" /> مقارنة جديدة!
-                </button>
-              )}
-            </div>
-          </div>
-        )}
+                    <p className="text-slate-650 text-[11px] leading-relaxed font-bold">
+                      أوه، الإشارة المختارة غير صحيحة! دعنا نقارن الكسر الأول <span className="font-extrabold text-indigo-700">{compNum1}/{compDen1}</span> مع الكسر الثاني <span className="font-extrabold text-rose-600">{compNum2}/{compDen2}</span> بقواعد منهاج بخت الرضا ص ٨٤:
+                    </p>
+
+                    <div className="bg-white rounded-2xl p-3 border border-rose-100 space-y-2 text-[10.5px] font-bold text-slate-705 leading-relaxed">
+                      <span className="text-[9.5px] text-slate-450 font-black border-b pb-1 block">قواعد المقارنة المنهجية:</span>
+                      {compDen1 === compDen2 ? (
+                        <div>
+                          <strong>١. متساويا المقام ({compDen1} و {compDen2}):</strong> بما أن الأجزاء مقسمة بالتساوي، فإن المقارنة سهلة جداً؛ الكسر ذو البسط الأكبر هو الكسر الأكبر مباشرة! {compNum1} مقارنة مع {compNum2}.
+                        </div>
+                      ) : compNum1 === compNum2 ? (
+                        <div>
+                          <strong>٢. متساويا البسط ({compNum1} و {compNum2}):</strong> انتبه لخدعة الحصص! عندما تتوزع قطعة واحدة على عدد أقل من الأفراد، يكون نصيب الفرد أكبر بكثير. لذلك: الكسر ذو المقام الأصغر يكون هو الكسر الأكبر!
+                        </div>
+                      ) : (
+                        <div>
+                          تأمل شكل البيتزا بالأعلى؛ الجزء المظلل باللون البرتقالي للكسر {compNum1}/{compDen1} هو بوضوح {compCorrect === '>' ? 'أكبر من' : compCorrect === '<' ? 'أصغر من' : 'يساوي'} الجزء المظلل للكسر {compNum2}/{compDen2}.
+                        </div>
+                      )}
+                      
+                      <div className="bg-amber-100 p-1.5 rounded text-amber-800 text-[10px] text-center">
+                        الإشارة الصائبة والنهائية هي: [ {compCorrect} ]
+                      </div>
+                    </div>
+
+                    <div className="space-y-2 border-t pt-3">
+                      <button
+                        onClick={handleApplyCompCorrection}
+                        className="w-full py-2.5 bg-gradient-to-r from-rose-500 to-rose-600 text-white font-black text-xs rounded-xl shadow transition-transform active:scale-95 flex items-center justify-center gap-1"
+                      >
+                         طبّق الاختيار الصحيح وتعلّم ⚖️
+                      </button>
+
+                      <button
+                        onClick={() => speakText(`تذكر أنه عندما يتساوى بسط الكسرين، فإن الكسر صاحب المقام الأصغر يكون هو الأكبر! لذلك فإن الكسر الأول هو ${compCorrect === '>' ? 'أكبر من' : compCorrect === '<' ? 'أصغر من' : 'يساوي'} الكسر الثاني.`)}
+                        className="w-full py-1.5 bg-white text-rose-700 font-extrabold text-[10px] rounded-xl border border-rose-250 flex items-center justify-center gap-1 hover:bg-rose-100 transition-colors"
+                      >
+                        🗣️ استمع للشرح الصوتي للمقارنة
+                      </button>
+
+                      <button
+                        onClick={generateComparison}
+                        className="w-full py-1 bg-slate-100 hover:bg-slate-200 text-slate-650 text-[10px] font-bold rounded-xl text-center"
+                      >
+                        تخطى إلى مقارنة تالية ➡️
+                      </button>
+                    </div>
+
+                  </div>
+                )}
+
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+        </div>
+
       </div>
+
     </div>
   );
 }
