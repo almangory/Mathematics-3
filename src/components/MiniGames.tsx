@@ -84,6 +84,7 @@ export default function MiniGames({ onAddStars }: MiniGamesProps) {
   const [attempts, setAttempts] = useState<number[]>([]);
   const [guessFeedback, setGuessFeedback] = useState<'start' | 'low' | 'high' | 'correct'>('start');
   const [starsWonG2, setStarsWonG2] = useState(0);
+  const [showTreasurePeek, setShowTreasurePeek] = useState(false);
 
   const initGuessGame = () => {
     soundEffects.playBeep();
@@ -91,11 +92,23 @@ export default function MiniGames({ onAddStars }: MiniGamesProps) {
     setAttempts([]);
     setGuessFeedback('start');
     setStarsWonG2(0);
+    
+    // Show peek quickly
+    setShowTreasurePeek(true);
   };
 
   useEffect(() => {
     initGuessGame();
   }, []);
+
+  // Safely auto-hide the treasure peek after 1.1 seconds
+  useEffect(() => {
+    if (!showTreasurePeek) return;
+    const timer = setTimeout(() => {
+      setShowTreasurePeek(false);
+    }, 1100);
+    return () => clearTimeout(timer);
+  }, [showTreasurePeek]);
 
   const handleGuess = (num: number) => {
     if (guessFeedback === 'correct') return;
@@ -264,8 +277,49 @@ export default function MiniGames({ onAddStars }: MiniGamesProps) {
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -15 }}
-              className="space-y-4"
+              className="space-y-4 relative overflow-hidden"
             >
+              <AnimatePresence>
+                {showTreasurePeek && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.9, y: 10 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.8, y: -10, filter: 'blur(10px)' }}
+                    transition={{ duration: 0.2 }}
+                    className="absolute inset-0 z-30 bg-[#141414]/98 rounded-[30px] border-4 border-[#FFA726] flex flex-col items-center justify-center text-center p-6 space-y-3"
+                  >
+                    <motion.div
+                      animate={{ 
+                        rotate: [0, -10, 10, -10, 10, 0],
+                        scale: [1, 1.15, 1, 1.15, 1]
+                      }}
+                      transition={{ duration: 0.6, repeat: 1 }}
+                      className="text-5xl"
+                    >
+                      🎁✨👑
+                    </motion.div>
+                    
+                    <div>
+                      <h4 className="text-lg font-black text-amber-400">⚡ ومضة الكنز السريعة!</h4>
+                      <p className="text-[11px] text-gray-300 font-bold max-w-sm leading-relaxed mt-0.5">
+                        افتح عينيك جيداً والقط رقم الكنز المضاء بسرعة البرق قبل اختفائه وقفل الصندوق! ⚡
+                      </p>
+                    </div>
+
+                    <div className="relative flex items-center justify-center">
+                      <div className="absolute w-24 h-24 bg-[#FFA726]/20 rounded-full blur-xl animate-ping" />
+                      <div className="relative bg-gradient-to-tr from-[#FFA726] to-yellow-300 text-slate-950 w-16 h-16 rounded-2xl flex items-center justify-center font-black text-4xl shadow-lg border-2 border-white animate-pulse">
+                        {toArabicNumerals(secretNumber)}
+                      </div>
+                    </div>
+
+                    <div className="text-[9px] text-[#FFA726] font-black tracking-widest animate-pulse">
+                      جاري القفل والإخفاء الآن... ركّز! 🔒
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
               <div className="flex flex-col md:flex-row items-center justify-between gap-4 bg-[#252525] p-4 rounded-3xl border border-white/5">
                 {/* Companion bubble */}
                 <div className="flex items-center gap-3">
@@ -273,7 +327,7 @@ export default function MiniGames({ onAddStars }: MiniGamesProps) {
                   <div className="text-right">
                     <span className="text-[10px] text-yellow-300 font-extrabold block">توجيه حسون الذكي:</span>
                     <p className="text-xs font-bold leading-relaxed max-w-md">
-                      {guessFeedback === 'start' && 'لقد فضيت بداخل صندوق كنز الأرقام سراً بين الرقم ١ و ٢٠! خمنه واستكشفه بذكاء!'}
+                      {guessFeedback === 'start' && '🔒 لقد تم قفل الكنز وإخفاء الرقم بنجاح بعد الوميض! خمن موقعه الآن لربح نجوم بخت الرضا كبطل مع عثمان!'}
                       {guessFeedback === 'low' && 'محاولة جيدة يا دكتورنا الصغير! لكن سر كنز الأرقام أكبر 📈 مما خجلت منه! جرب رقماً أكبر!'}
                       {guessFeedback === 'high' && 'تلميحة عاجلة! الرقم المطلوب أصغر 📉 من الرقم الذي اخترته. تفقد الأرقام الأقل!'}
                       {guessFeedback === 'correct' && `يا للروعة المطلقة! لقد هزمت التخمين وكشفت سر الرقم وهو (${toArabicNumerals(secretNumber)}) بالتمام!`}
