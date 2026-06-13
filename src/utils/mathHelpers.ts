@@ -54,3 +54,11 @@ export function numberToArabicWords(num: number): string {
   // Join parts with 'و'
   return resultParts.filter(p => p !== "").join(" و");
 }
+
+// Convert Western Arabic digits (0-9) to Eastern Arabic digits (٠-٩)
+export function toArabicNumerals(num: number | string | undefined | null): string {
+  if (num === undefined || num === null) return "";
+  const arabicDigits = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+  return String(num).replace(/[0-9]/g, (w) => arabicDigits[+w]);
+}
+

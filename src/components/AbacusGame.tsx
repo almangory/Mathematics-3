@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Sparkles, Trophy, ArrowLeft, Star, Volume2, Award, Lightbulb, BookOpen, AlertCircle, CheckCircle } from 'lucide-react';
-import { numberToArabicWords } from '../utils/mathHelpers';
+import { numberToArabicWords, toArabicNumerals } from '../utils/mathHelpers';
 import { soundEffects } from '../utils/audio';
 
 interface AbacusGameProps {
@@ -178,7 +178,7 @@ export default function AbacusGame({ onBack, onAddStars }: AbacusGameProps) {
         </h2>
         <div className="flex items-center gap-2 bg-amber-600 bg-opacity-30 px-4 py-1.5 rounded-full text-sm font-bold">
           <Trophy className="w-5 h-5 text-yellow-300 ml-1" />
-          <span>{starsWon} من الأعداد ⭐</span>
+          <span>{toArabicNumerals(starsWon)} من الأعداد ⭐</span>
         </div>
       </div>
 
@@ -265,7 +265,7 @@ export default function AbacusGame({ onBack, onAddStars }: AbacusGameProps) {
                       <div className="flex items-center gap-3">
                         <span className="text-slate-705 text-xs font-semibold">مثّل العدد المنشود التالي بالخرزات:</span>
                         <div className="bg-emerald-100 border-2 border-emerald-400 rounded-xl p-2 px-6 font-black text-2xl text-emerald-800">
-                          {targetNumber}
+                          {toArabicNumerals(targetNumber)}
                         </div>
                       </div>
                     )}
@@ -350,7 +350,7 @@ export default function AbacusGame({ onBack, onAddStars }: AbacusGameProps) {
             <div className="bg-slate-50 rounded-2xl p-4 border border-slate-200 max-w-xl mx-auto flex flex-col items-center justify-center text-center">
               <span className="text-[10px] font-bold text-slate-500">تمثيل العداد الحالي:</span>
               <strong className="text-3xl font-black text-indigo-900 tracking-widest mt-1">
-                {currentNumber}
+                {toArabicNumerals(currentNumber)}
               </strong>
               <div className="flex items-center gap-2 mt-2 text-xs font-bold text-sky-800">
                 <span>({numberToArabicWords(currentNumber)})</span>
@@ -415,7 +415,7 @@ export default function AbacusGame({ onBack, onAddStars }: AbacusGameProps) {
                   </div>
 
                   <p className="text-slate-600 text-[11px] leading-relaxed font-bold">
-                    أوه! العداد الحالي يمثل القيمة <span className="text-rose-600">({currentNumber})</span>، بينما القيمة الصحيحة المطلوبة هي <span className="text-emerald-700">({targetNumber})</span>. لندرسها سوياً لنتعلم الدرس!
+                    أوه! العداد الحالي يمثل القيمة <span className="text-rose-600">({toArabicNumerals(currentNumber)})</span>، بينما القيمة الصحيحة المطلوبة هي <span className="text-emerald-700">({toArabicNumerals(targetNumber)})</span>. لندرسها سوياً لنتعلم الدرس!
                   </p>
 
                   {/* Comparisons card layout */}
@@ -425,19 +425,19 @@ export default function AbacusGame({ onBack, onAddStars }: AbacusGameProps) {
                       <div className="bg-rose-100/50 p-1.5 rounded text-center">
                         <span className="text-rose-800 font-extrabold block">خرزاتك ❌</span>
                         <div className="text-[10px] text-rose-700 mt-1 font-bold">
-                          - آلاف: {thousands}<br />
-                          - مئات: {hundreds}<br />
-                          - عشرات: {tens}<br />
-                          - آحاد: {units}
+                          - آلاف: {toArabicNumerals(thousands)}<br />
+                          - مئات: {toArabicNumerals(hundreds)}<br />
+                          - عشرات: {toArabicNumerals(tens)}<br />
+                          - آحاد: {toArabicNumerals(units)}
                         </div>
                       </div>
                       <div className="bg-emerald-100/50 p-1.5 rounded text-center">
                         <span className="text-emerald-800 font-extrabold block">الصحيح المنهجي ✔️</span>
                         <div className="text-[10px] text-emerald-700 mt-1 font-bold">
-                          - آلاف: {targetTh}<br />
-                          - مئات: {targetH}<br />
-                          - عشرات: {targetT}<br />
-                          - آحاد: {targetU}
+                          - آلاف: {toArabicNumerals(targetTh)}<br />
+                          - مئات: {toArabicNumerals(targetH)}<br />
+                          - عشرات: {toArabicNumerals(targetT)}<br />
+                          - آحاد: {toArabicNumerals(targetU)}
                         </div>
                       </div>
                     </div>

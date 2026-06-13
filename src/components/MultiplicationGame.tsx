@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ArrowLeft, Trophy, Heart, HelpCircle, ShieldQuestion, Star, AlertCircle, Lightbulb, CheckSquare, Volume2 } from 'lucide-react';
 import { soundEffects } from '../utils/audio';
+import { toArabicNumerals } from '../utils/mathHelpers';
 
 interface MultiplicationGameProps {
   onBack: () => void;
@@ -220,7 +221,7 @@ export default function MultiplicationGame({ onBack, onAddStars }: Multiplicatio
             ))}
           </div>
           <div className="bg-sky-600 bg-opacity-30 px-4 py-1.5 rounded-full text-xs font-black">
-            الدرجة بالدرس: {score} / ٥٠ ⭐
+            الدرجة بالدرس: {toArabicNumerals(score)} / ٥٠ ⭐
           </div>
         </div>
       </div>
@@ -307,7 +308,7 @@ export default function MultiplicationGame({ onBack, onAddStars }: Multiplicatio
                 <span className="absolute top-2 right-4 text-[10px] font-mono text-emerald-400">منهاج الصف الثالث</span>
                 <div className="text-[10px] text-slate-300 font-bold mb-2">حل عملية الضرب لفرقعة البالون الصحيح:</div>
                 <div className="text-5xl font-black text-white py-4 tracking-widest font-mono">
-                  {question.text} = ؟
+                  {toArabicNumerals(question.text)} = ؟
                 </div>
                 <p className="text-emerald-300 text-xs italic mt-2 animate-pulse">انقر على البالون الملون المطابق للحل!</p>
               </div>
@@ -358,7 +359,7 @@ export default function MultiplicationGame({ onBack, onAddStars }: Multiplicatio
                     {/* Balloon Shape */}
                     <div className={`w-28 h-36 rounded-full bg-gradient-to-b ${balloonColors[idx % balloonColors.length]} shadow-lg flex flex-col items-center justify-center border-4 border-white border-opacity-35 select-none transform hover:scale-108 active:scale-95 transition-transform`}>
                       <span className="text-3xl font-black text-white drop-shadow">
-                        {val}
+                        {toArabicNumerals(val)}
                       </span>
                       {/* Polish specular shine */}
                       <div className="absolute top-3 left-4 w-6 h-10 bg-white/20 rounded-full rotate-12" />
@@ -381,7 +382,7 @@ export default function MultiplicationGame({ onBack, onAddStars }: Multiplicatio
                   />
                 </div>
                 <div className="text-[10px] text-center font-bold text-slate-500">
-                  كسب الأهداف للدرس الحالي: ({score} من أصل ٥٠ نقطة المطلوبة)
+                  كسب الأهداف للدرس الحالي: ({toArabicNumerals(score)} من أصل ٥٠ نقطة المطلوبة)
                 </div>
               </div>
 
@@ -424,7 +425,7 @@ export default function MultiplicationGame({ onBack, onAddStars }: Multiplicatio
                     </div>
 
                     <p className="text-slate-600 text-[11px] leading-relaxed font-bold">
-                      أوه! لقد اخترت البالون رقم <span className="text-rose-600 font-black">{answeredVal}</span>، بينما الحل الصحيح والصائب لـ <span className="text-slate-700 font-extrabold">{question.text}</span> هو <span className="text-emerald-750 font-black text-sm">{question.answer}</span>!
+                      أوه! لقد اخترت البالون رقم <span className="text-rose-600 font-black">{toArabicNumerals(answeredVal)}</span>، بينما الحل الصحيح والصائب لـ <span className="text-slate-700 font-extrabold">{toArabicNumerals(question.text)}</span> هو <span className="text-emerald-750 font-black text-sm">{toArabicNumerals(question.answer)}</span>!
                     </p>
 
                     {/* Repeated addition illustration */}
@@ -434,14 +435,14 @@ export default function MultiplicationGame({ onBack, onAddStars }: Multiplicatio
                          {question.num2 === 0 ? (
                            "قاعدة الختم بالصفر: عند الضرب بأي شكل في الرقم صفر، فإن المجموعة تختفي وتصبح النتيجة صِفراً تماماً!"
                          ) : question.num2 === 1 ? (
-                           `قاعدة الرقم واحد المحايد: أي شيء يُضرب في ١ يظل كما هو تماماً، وهو تكرار الشيء لمرة واحدة: [ ${question.num1} ].`
+                           `قاعدة الرقم واحد المحايد: أي شيء يُضرب في ١ يظل كما هو تماماً، وهو تكرار الشيء لمرة واحدة: [ ${toArabicNumerals(question.num1)} ].`
                          ) : (
-                           `الضرب في ${question.num2} يعني أن نكرر جمع العدد أربع أو عدة مرات: كالتالي:`
+                           `الضرب في ${toArabicNumerals(question.num2)} يعني أن نكرر جمع العدد أربع أو عدة مرات: كالتالي:`
                          )}
                        </p>
                        {question.num2 > 1 && (
                          <div className="bg-rose-50 text-center rounded-xl p-1.5 font-bold text-xs text-rose-700 tracking-wide">
-                           {Array(question.num2).fill(question.num1).join(' + ')} = {question.answer}
+                           {Array(question.num2).fill(question.num1).map(x => toArabicNumerals(x)).join(' + ')} = {toArabicNumerals(question.answer)}
                          </div>
                        )}
                     </div>
@@ -460,7 +461,7 @@ export default function MultiplicationGame({ onBack, onAddStars }: Multiplicatio
                           ))}
                         </div>
                         <span className="block text-[8px] text-center text-slate-400 mt-1">
-                          (عدّ النجوم بالأعلى لتجد المجموع الكلي: {question.answer} نجوم!)
+                          (عدّ النجوم بالأعلى لتجد المجموع الكلي: {toArabicNumerals(question.answer)} نجوم!)
                         </span>
                       </div>
                     )}

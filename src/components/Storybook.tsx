@@ -18,6 +18,7 @@ import {
   Heart
 } from 'lucide-react';
 import { soundEffects } from '../utils/audio';
+import { toArabicNumerals } from '../utils/mathHelpers';
 
 interface StorybookProps {
   onBack: () => void;
@@ -568,7 +569,7 @@ export default function Storybook({ onBack, onAddStars }: StorybookProps) {
                     <div className="flex-1 space-y-3 text-right w-full">
                       <div className="flex justify-between items-center text-xs text-gray-500 font-bold">
                         <span>وقت التحضير المضاف:</span>
-                        <span className="text-rose-600 font-black text-sm">{story5ClockSliderValue} دقيقة</span>
+                        <span className="text-rose-600 font-black text-sm">{toArabicNumerals(story5ClockSliderValue)} دقيقة</span>
                       </div>
                       <input 
                         type="range" 
@@ -589,7 +590,7 @@ export default function Storybook({ onBack, onAddStars }: StorybookProps) {
                       
                       <div className="bg-rose-50 border border-rose-100 p-2.5 rounded-2xl text-center">
                         <span className="text-xs font-black text-rose-700">الوقت المحدد على الساعة الكردفانية: </span>
-                        <span className="text-sm font-extrabold text-blue-700 border-b-2 border-blue-300">٤:{story5ClockSliderValue.toString().padStart(2, '0')}</span>
+                        <span className="text-sm font-extrabold text-blue-700 border-b-2 border-blue-300">{toArabicNumerals(`٤:${story5ClockSliderValue.toString().padStart(2, '0')}`)}</span>
                       </div>
                     </div>
                   </div>

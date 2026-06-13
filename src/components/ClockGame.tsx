@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ArrowLeft, Trophy, Sparkles, Volume2, RefreshCw, Star, Clock, AlertCircle, Lightbulb, CheckCircle2 } from 'lucide-react';
 import { soundEffects } from '../utils/audio';
+import { toArabicNumerals } from '../utils/mathHelpers';
 
 interface ClockGameProps {
   onBack: () => void;
@@ -186,7 +187,7 @@ export default function ClockGame({ onBack, onAddStars }: ClockGameProps) {
         </h2>
         <div className="flex items-center gap-2 bg-amber-600 bg-opacity-30 px-4 py-1.5 rounded-full text-sm font-bold">
           <Trophy className="w-5 h-5 text-yellow-300 ml-1" />
-          <span>{stars} نجوم الزمن ⭐</span>
+          <span>{toArabicNumerals(stars)} نجوم الزمن ⭐</span>
         </div>
       </div>
 
@@ -318,7 +319,7 @@ export default function ClockGame({ onBack, onAddStars }: ClockGameProps) {
                 <div className="bg-slate-800 text-white rounded-2xl p-4 border-4 border-amber-900 text-center shadow-lg font-mono">
                   <span className="text-[9.5px] block text-slate-450 font-bold tracking-widest mb-1">النمط الرقمي للوقت</span>
                   <div className="text-4xl font-extrabold tracking-widest text-emerald-400">
-                    {hours.toString().padStart(2, '0')}:{minutes.toString().padStart(2, '0')}
+                    {toArabicNumerals(`${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`)}
                   </div>
                   <button
                     onClick={() => speakText(getTimeName(hours, minutes))}
@@ -338,7 +339,7 @@ export default function ClockGame({ onBack, onAddStars }: ClockGameProps) {
                     >
                       +
                     </button>
-                    <span className="my-1.5 font-black text-lg text-slate-800">{hours}</span>
+                    <span className="my-1.5 font-black text-lg text-slate-800">{toArabicNumerals(hours)}</span>
                     <button
                       onClick={() => adjustHours(-1)}
                       className="w-8 h-8 rounded-full bg-slate-100 font-extrabold text-sm flex items-center justify-center hover:bg-rose-100 hover:text-rose-700 active:scale-95 transition-transform"
@@ -355,7 +356,7 @@ export default function ClockGame({ onBack, onAddStars }: ClockGameProps) {
                     >
                       +
                     </button>
-                    <span className="my-1.5 font-black text-lg text-slate-800">{minutes}</span>
+                    <span className="my-1.5 font-black text-lg text-slate-800">{toArabicNumerals(minutes)}</span>
                     <button
                       onClick={() => adjustMinutes(-5)}
                       className="w-8 h-8 rounded-full bg-slate-100 font-extrabold text-sm flex items-center justify-center hover:bg-sky-100 hover:text-sky-700 active:scale-95 transition-transform"
@@ -418,14 +419,14 @@ export default function ClockGame({ onBack, onAddStars }: ClockGameProps) {
                   </div>
 
                   <p className="text-slate-650 text-[11px] leading-relaxed font-bold">
-                    أوه، عقارب الساعة ومواقيتها غير دقيقة! عقاربك الحالية تمثل <span className="text-rose-600 font-extrabold">{getTimeName(hours, minutes)} ({hours}:{minutes.toString().padStart(2, '0')})</span>، والمطلوب تماماً هو <span className="text-emerald-750 font-black">{challengeText}</span>!
+                    أوه، عقارب الساعة ومواقيتها غير دقيقة! عقاربك الحالية تمثل <span className="text-rose-600 font-extrabold">{getTimeName(hours, minutes)} ({toArabicNumerals(hours)}:{toArabicNumerals(minutes.toString().padStart(2, '0'))})</span>، والمطلوب تماماً هو <span className="text-emerald-750 font-black">{challengeText}</span>!
                   </p>
 
                   <div className="bg-white rounded-2xl p-3 border border-rose-100 space-y-2 text-[10.5px] font-bold text-slate-700 leading-relaxed">
                     <span className="text-[9.5px] text-slate-450 border-b pb-1 font-black block">زوايا عقارب بخت الرضا:</span>
-                    <div>- عقرب الساعات (القصير الأحمر) يجب أن يوجه ليشير للرقم المنهجي وهو: <strong className="text-rose-600 text-sm">{targetHours}</strong>.</div>
+                    <div>- عقرب الساعات (القصير الأحمر) يجب أن يوجه ليشير للرقم المنهجي وهو: <strong className="text-rose-600 text-sm">{toArabicNumerals(targetHours)}</strong>.</div>
                     
-                    <div>- عقرب الدقائق (الطويل الأزرق) يجب أن يوجه للدقائق المطلوبة وهي: <strong className="text-sky-600 text-sm">{targetMinutes} دقيقة</strong> (وهي مطابقة لحركة الرقم <strong className="text-slate-800">{targetMinutes / 5}</strong> على الساعة).</div>
+                    <div>- عقرب الدقائق (الطويل الأزرق) يجب أن يوجه للدقائق المطلوبة وهي: <strong className="text-sky-600 text-sm">{toArabicNumerals(targetMinutes)} دقيقة</strong> (وهي مطابقة لحركة الرقم <strong className="text-slate-800">{toArabicNumerals(targetMinutes / 5)}</strong> على الساعة).</div>
                   </div>
 
                   <div className="bg-amber-50 border border-amber-200 rounded-2xl p-3 flex gap-2 items-start text-[10.5px]">

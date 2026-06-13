@@ -10,8 +10,10 @@ import GeometryGame from './components/GeometryGame';
 import AiTutor from './components/AiTutor';
 import ExamsGame from './components/ExamsGame';
 import Storybook from './components/Storybook';
+import MiniGames from './components/MiniGames';
 import { soundEffects } from './utils/audio';
 import { Trophy, Star, Sparkles, BookOpen, GraduationCap, ChevronLeft, Volume2 } from 'lucide-react';
+import { toArabicNumerals } from './utils/mathHelpers';
 
 export default function App() {
   const [activeUnit, setActiveUnit] = useState<ActiveUnit>('dashboard');
@@ -60,7 +62,7 @@ export default function App() {
           </div>
         </div>
         <div className="flex items-center gap-2 bg-white text-[#6C63FF] px-4 py-1.5 rounded-full border-2 border-yellow-400 shadow-md">
-          <span className="font-black text-base md:text-xl">⭐ {stars}</span>
+          <span className="font-black text-base md:text-xl">⭐ {toArabicNumerals(stars)}</span>
           <span className="text-xs font-bold text-[#6C63FF]">نجمـة</span>
         </div>
       </header>
@@ -223,35 +225,13 @@ export default function App() {
         </div>
       </main>
 
-      {/* Bottom Achievement Bar styled like the mock design */}
-      <footer className="bg-[#343434] bg-opacity-95 rounded-[40px] p-6 flex flex-col md:flex-row items-center justify-between gap-6 border-t-8 border-yellow-400 shadow-inner text-white">
-        <div className="text-yellow-400 font-black text-xl italic whitespace-nowrap">🏆 لوحة شرف فرسان الأرقام:</div>
-        <div className="flex-1 flex flex-wrap gap-4 justify-center md:justify-start">
-          <div className="flex items-center gap-3 bg-white/10 px-4 py-2 rounded-2xl border border-white/20">
-            <div className="w-10 h-10 bg-yellow-500 rounded-full flex items-center justify-center text-xl">🥇</div>
-            <div>
-              <div className="text-xs font-bold text-gray-300">البطل فواز</div>
-              <div className="text-lg font-black leading-none">12,500 ⭐</div>
-            </div>
-          </div>
-          <div className="flex items-center gap-3 bg-white/10 px-4 py-2 rounded-2xl border border-white/20 opacity-80">
-            <div className="w-10 h-10 bg-gray-400 rounded-full flex items-center justify-center text-xl">🥈</div>
-            <div>
-              <div className="text-xs font-bold text-gray-300">البطلة مزن</div>
-              <div className="text-lg font-black leading-none">10,400 ⭐</div>
-            </div>
-          </div>
-          <div className="flex items-center gap-3 bg-white/10 px-4 py-2 rounded-2xl border border-white/20 opacity-60">
-            <div className="w-10 h-10 bg-orange-700 rounded-full flex items-center justify-center text-xl">🥉</div>
-            <div>
-              <div className="text-xs font-bold text-gray-300">البطل مرتضى</div>
-              <div className="text-lg font-black leading-none">9,800 ⭐</div>
-            </div>
-          </div>
-        </div>
-        <div className="text-[11px] text-gray-450 leading-relaxed text-center md:text-right">
-          المركز القومي للمناهج والبحث التربوي - بخت الرضا © {new Date().getFullYear()}
-        </div>
+      {/* Bottom Mini-Games Arena replacing the static leaderboard */}
+      <div className="mt-8" id="mini-games-wrapper">
+        <MiniGames onAddStars={addStars} />
+      </div>
+
+      <footer className="mt-6 py-4 border-t border-dashed border-slate-300 text-slate-500 text-center text-xs font-bold">
+        <span>تم التصميم بواسطة عثمان المنقوري © {toArabicNumerals(new Date().getFullYear())}</span>
       </footer>
     </div>
   );

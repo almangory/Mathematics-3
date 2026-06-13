@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ArrowLeft, Trophy, HelpCircle, ArrowRight, CheckCircle2, AlertCircle, Lightbulb, Volume2 } from 'lucide-react';
 import { soundEffects } from '../utils/audio';
+import { toArabicNumerals } from '../utils/mathHelpers';
 
 interface DivisionGameProps {
   onBack: () => void;
@@ -196,7 +197,7 @@ export default function DivisionGame({ onBack, onAddStars }: DivisionGameProps) 
         </h2>
         <div className="flex items-center gap-2 bg-emerald-600 bg-opacity-30 px-4 py-1.5 rounded-full font-bold text-sm">
           <Trophy className="w-5 h-5 text-yellow-300 ml-1" />
-          <span>{stars} نجوم القسمة ⭐</span>
+          <span>{toArabicNumerals(stars)} نجوم القسمة ⭐</span>
         </div>
       </div>
 
@@ -258,7 +259,7 @@ export default function DivisionGame({ onBack, onAddStars }: DivisionGameProps) 
                       <div>
                         <strong className="text-slate-800 text-xs font-black block">مسألة توزيع عادل:</strong>
                         <p className="text-slate-650 text-[11px] leading-relaxed mt-1 font-bold">
-                          لدينا مجموع <span className="text-emerald-700 font-extrabold text-sm">{sharingTotal}</span> من الـ ({currQ.item})، نريد تقسيمها بالتساوي على <span className="text-amber-800 font-extrabold text-sm">{sharingDivisor}</span> من ({currQ.target})!
+                          لدينا مجموع <span className="text-emerald-700 font-extrabold text-sm">{toArabicNumerals(sharingTotal)}</span> من الـ ({currQ.item})، نريد تقسيمها بالتساوي على <span className="text-amber-800 font-extrabold text-sm">{toArabicNumerals(sharingDivisor)}</span> من ({currQ.target})!
                         </p>
                       </div>
                     </div>
@@ -351,7 +352,7 @@ export default function DivisionGame({ onBack, onAddStars }: DivisionGameProps) 
                       <span className="absolute top-2 right-4 text-[9px] font-mono text-indigo-400">منهاج الصف الثالث ص ٦٩</span>
                       <div className="text-[10px] text-slate-350 font-bold mb-2">احسب حاصل المعادلة باتباع قاعدة الأسبقية:</div>
                       <div className="text-4xl font-extrabold text-white py-2 tracking-wide font-mono">
-                        {opNum1} {opType} {opNum2} ÷ {opNum3} = ؟
+                        {toArabicNumerals(opNum1)} {opType} {toArabicNumerals(opNum2)} ÷ {toArabicNumerals(opNum3)} = ؟
                       </div>
                       <p className="text-indigo-300 text-[10px] italic mt-2">هل تبدأ بالقسمة والضرب أم الجمع والطرح؟</p>
                     </div>
@@ -436,22 +437,22 @@ export default function DivisionGame({ onBack, onAddStars }: DivisionGameProps) 
                     </div>
 
                     <p className="text-slate-650 text-[11px] leading-relaxed font-bold">
-                      أوه، هناك خطأ في التوزيع! قمت بالمحاولة، ولكن التجزئة الصحيحة لـ <span className="font-extrabold text-rose-600">{sharingTotal} ÷ {sharingDivisor}</span> تتطلب حساباً دقيقاً كالتالي:
+                      أوه، هناك خطأ في التوزيع! قمت بالمحاولة، ولكن التجزئة الصحيحة لـ <span className="font-extrabold text-rose-600">{toArabicNumerals(sharingTotal)} ÷ {toArabicNumerals(sharingDivisor)}</span> تتطلب حساباً دقيقاً كالتالي:
                     </p>
 
                     {/* Step-by-step resolution display */}
                     <div className="bg-white rounded-2xl p-3 border border-rose-100 flex flex-col gap-1.5 text-[11px] font-bold text-slate-700">
                       <span className="text-[10px] text-slate-400 border-b pb-1 font-black">خطوات المعلم حسون:</span>
-                      <div>١. كم مرة نكرر الـ <span className="text-amber-800">{sharingDivisor}</span> بدون تخطي الـ <span className="text-emerald-700">{sharingTotal}</span>؟</div>
+                      <div>١. كم مرة نكرر الـ <span className="text-amber-800">{toArabicNumerals(sharingDivisor)}</span> بدون تخطي الـ <span className="text-emerald-700">{toArabicNumerals(sharingTotal)}</span>؟</div>
                       <div className="bg-emerald-50 text-emerald-800 p-1.5 rounded text-center my-1">
-                        {sharingDivisor} × {currQ.quotient} = {sharingDivisor * currQ.quotient}
+                        {toArabicNumerals(sharingDivisor)} × {toArabicNumerals(currQ.quotient)} = {toArabicNumerals(sharingDivisor * currQ.quotient)}
                       </div>
                       <div>٢. نطرح المجموع المحسوب من الرقم الكلي لاستخراج المتبقي:</div>
                       <div className="bg-amber-50 text-amber-800 p-1.5 rounded text-center my-1">
-                        {sharingTotal} - {sharingDivisor * currQ.quotient} = {currQ.remainder} (الباقي الحقيقي)
+                        {toArabicNumerals(sharingTotal)} - {toArabicNumerals(sharingDivisor * currQ.quotient)} = {toArabicNumerals(currQ.remainder)} (الباقي الحقيقي)
                       </div>
                       <span className="block text-[10px] text-rose-800 font-semibold leading-relaxed mt-1">
-                        لذلك: نصيب الواحد = {currQ.quotient}، وحبة الفاكهة الباقية بالخارج = {currQ.remainder}!
+                        لذلك: نصيب الواحد = {toArabicNumerals(currQ.quotient)}، وحبة الفاكهة الباقية بالخارج = {toArabicNumerals(currQ.remainder)}!
                       </span>
                     </div>
 
@@ -491,22 +492,22 @@ export default function DivisionGame({ onBack, onAddStars }: DivisionGameProps) 
                     </div>
 
                     <p className="text-slate-650 text-[11px] leading-relaxed font-bold">
-                      أوه، النتيجة الحسابية غير صحيحة! تذكر قواعد الأولوية وحل المعادلة <span className="font-extrabold text-indigo-700">{opNum1} {opType} {opNum2} ÷ {opNum3}</span> بالترتيب المنهجي:
+                      أوه، النتيجة الحسابية غير صحيحة! تذكر قواعد الأولوية وحل المعادلة <span className="font-extrabold text-indigo-700">{toArabicNumerals(opNum1)} {opType} {toArabicNumerals(opNum2)} ÷ {toArabicNumerals(opNum3)}</span> بالترتيب المنهجي:
                     </p>
 
                     {/* Step-by-step priority breakdown */}
                     <div className="bg-white rounded-2xl p-3 border border-rose-100/70 space-y-2 text-[10.5px] font-semibold text-slate-700">
                       <span className="text-[9.5px] text-slate-400 font-black border-b pb-1 block">تفكيك خطوة بخطوة:</span>
                       <div>
-                        <strong>الخطوة ١:</strong> قم بعملية {currOpQ.isDiv ? 'القسمة لـ' : 'الضرب لـ'} <span className="text-indigo-700">{opNum2} ÷ {opNum3}</span> أولاً:
+                        <strong>الخطوة ١:</strong> قم بعملية {currOpQ.isDiv ? 'القسمة لـ' : 'الضرب لـ'} <span className="text-indigo-700">{toArabicNumerals(opNum2)} ÷ {toArabicNumerals(opNum3)}</span> أولاً:
                         <div className="bg-indigo-50 text-indigo-800 p-1 rounded-lg text-center font-bold my-1">
-                          {opNum2} ÷ {opNum3} = {Math.floor(opNum2 / opNum3)}
+                          {toArabicNumerals(opNum2)} ÷ {toArabicNumerals(opNum3)} = {toArabicNumerals(Math.floor(opNum2 / opNum3))}
                         </div>
                       </div>
                       <div>
-                        <strong>الخطوة ٢:</strong> الآن اجمع أو اطرح الناتج من الرقم الأول <span className="text-slate-900 font-black">{opNum1}</span>:
+                        <strong>الخطوة ٢:</strong> الآن اجمع أو اطرح الناتج من الرقم الأول <span className="text-slate-900 font-black">{toArabicNumerals(opNum1)}</span>:
                         <div className="bg-emerald-50 text-emerald-800 p-1 rounded-lg text-center font-bold my-1">
-                          {opNum1} {opType} {Math.floor(opNum2 / opNum3)} = {currOpQ.ans}
+                          {toArabicNumerals(opNum1)} {opType} {toArabicNumerals(Math.floor(opNum2 / opNum3))} = {toArabicNumerals(currOpQ.ans)}
                         </div>
                       </div>
                     </div>

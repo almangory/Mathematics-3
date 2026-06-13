@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { soundEffects } from '../utils/audio';
+import { toArabicNumerals } from '../utils/mathHelpers';
 import { ArrowLeft, BookOpen, Trophy, Star, ShieldQuestion, HelpCircle, Check, X, Award, CheckCircle2, RefreshCw } from 'lucide-react';
 
 interface ExamsGameProps {
@@ -742,10 +743,10 @@ export default function ExamsGame({ onBack, onAddStars }: ExamsGameProps) {
                   </p>
                 </div>
                 <div className="text-center bg-yellow-400 text-yellow-950 px-4 py-1.5 rounded-full font-black text-xs md:text-sm">
-                  السؤال {currentQuestionIndex + 1} من {currentQuestions.length}
+                  السؤال {toArabicNumerals(currentQuestionIndex + 1)} من {toArabicNumerals(currentQuestions.length)}
                 </div>
                 <div className="text-left font-black text-sm text-amber-600">
-                  مرات الصواب: {quizScore} / {currentQuestions.length}
+                  مرات الصواب: {toArabicNumerals(quizScore)} / {toArabicNumerals(currentQuestions.length)}
                 </div>
               </div>
 
@@ -884,7 +885,7 @@ export default function ExamsGame({ onBack, onAddStars }: ExamsGameProps) {
               <div className="bg-yellow-50 border-4 border-yellow-300 rounded-[30px] p-6 shadow-inner space-y-4">
                 <div className="text-gray-400 font-bold text-xs uppercase tracking-wider">علامتك النهائية:</div>
                 <div className="text-5xl md:text-6xl font-black text-yellow-600">
-                  {quizScore} / {currentQuestions.length}
+                  {toArabicNumerals(quizScore)} / {toArabicNumerals(currentQuestions.length)}
                 </div>
                 <div className="text-xs font-bold text-yellow-800">
                   أثبتَّ أنك تلميذ مجتهد وذكي بالصف الثالث الابتدائي وتستحق بطلاً لفرسان النجوم!
@@ -897,7 +898,7 @@ export default function ExamsGame({ onBack, onAddStars }: ExamsGameProps) {
                   <div className="text-3xl">⭐</div>
                   <div className="text-right">
                     <span className="text-[10px] block text-amber-100 font-bold leading-none">مجموع النجوم الكلية الممنوحة:</span>
-                    <strong className="text-lg font-black">{starsAwarded} نجمة لتلميذنا البطل!</strong>
+                    <strong className="text-lg font-black">{toArabicNumerals(starsAwarded)} نجمة لتلميذنا البطل!</strong>
                   </div>
                 </div>
                 <Award className="w-8 h-8 text-yellow-200" />

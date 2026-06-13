@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ArrowLeft, Trophy, Sparkles, HelpCircle, Check, Play, RefreshCw, Star, AlertCircle, Lightbulb, Volume2, CheckCircle2 } from 'lucide-react';
 import { soundEffects } from '../utils/audio';
+import { toArabicNumerals } from '../utils/mathHelpers';
 
 interface FractionLabProps {
   onBack: () => void;
@@ -202,7 +203,7 @@ export default function FractionLab({ onBack, onAddStars }: FractionLabProps) {
         </h2>
         <div className="flex items-center gap-2 bg-rose-600 bg-opacity-30 px-4 py-1.5 rounded-full font-bold text-sm">
           <Trophy className="w-5 h-5 text-yellow-300 ml-1" />
-          <span>{stars} نجوم الكسور ⭐</span>
+          <span>{toArabicNumerals(stars)} نجوم الكسور ⭐</span>
         </div>
       </div>
 
@@ -303,7 +304,7 @@ export default function FractionLab({ onBack, onAddStars }: FractionLabProps) {
                             pizzaSlices === val ? 'bg-rose-500 text-white shadow-md' : 'bg-rose-100 text-rose-700 hover:bg-rose-200/50'
                           }`}
                         >
-                          {val}
+                          {toArabicNumerals(val)}
                         </button>
                       ))}
                     </div>
@@ -315,9 +316,9 @@ export default function FractionLab({ onBack, onAddStars }: FractionLabProps) {
                     <h4 className="text-xs font-black text-rose-800 border-b pb-2">📊 قراءة قيمة هذا الكسر:</h4>
                     <div className="flex justify-center items-center gap-4 py-2 border-b border-rose-50">
                       <div className="flex flex-col items-center justify-center font-black text-2xl text-rose-900">
-                        <span>{activeNumeratorCreator}</span>
+                        <span>{toArabicNumerals(activeNumeratorCreator)}</span>
                         <div className="w-10 h-1 bg-rose-900 rounded my-1" />
-                        <span>{pizzaSlices}</span>
+                        <span>{toArabicNumerals(pizzaSlices)}</span>
                       </div>
                       <span className="text-xs text-slate-400">البسط الملون على المقام الكلي</span>
                     </div>
@@ -391,7 +392,7 @@ export default function FractionLab({ onBack, onAddStars }: FractionLabProps) {
                     <div className="text-[10px] text-emerald-400 mb-1 font-black">تحدي تلوين الكسر المطلوب:</div>
                     <span className="text-xs text-slate-300 font-bold block">مطلوب تلوين حصة تكافئ:</span>
                     <strong className="text-4xl text-white font-extrabold block my-2 font-mono">
-                      {matchRequired} / {matchDenominator}
+                      {toArabicNumerals(matchRequired)} / {toArabicNumerals(matchDenominator)}
                     </strong>
                     <span className="text-[11px] text-amber-200 font-semibold block">
                       أي كسر: {fractionToWords(matchRequired, matchDenominator)}
@@ -401,7 +402,7 @@ export default function FractionLab({ onBack, onAddStars }: FractionLabProps) {
                   <div className="bg-white p-5 rounded-2xl border border-rose-100 space-y-4">
                     <div className="flex justify-between items-center text-xs">
                       <span className="text-slate-500 font-bold">تلوينك الحالي:</span>
-                      <strong className="text-rose-700 font-black text-sm">{matchUserCount} من {matchDenominator} قطعة</strong>
+                      <strong className="text-rose-700 font-black text-sm">{toArabicNumerals(matchUserCount)} من {toArabicNumerals(matchDenominator)} قطعة</strong>
                     </div>
 
                     {matchStatus !== 'success' && (
@@ -472,7 +473,7 @@ export default function FractionLab({ onBack, onAddStars }: FractionLabProps) {
                           })}
                         </svg>
                       </div>
-                      <strong className="text-base text-rose-900 mt-2 font-mono">{compNum1} / {compDen1}</strong>
+                      <strong className="text-base text-rose-900 mt-2 font-mono">{toArabicNumerals(compNum1)} / {toArabicNumerals(compDen1)}</strong>
                       <span className="text-[9px] text-gray-400 block text-center">({fractionToWords(compNum1, compDen1)})</span>
                     </div>
 
@@ -506,7 +507,7 @@ export default function FractionLab({ onBack, onAddStars }: FractionLabProps) {
                           })}
                         </svg>
                       </div>
-                      <strong className="text-base text-rose-900 mt-2 font-mono">{compNum2} / {compDen2}</strong>
+                      <strong className="text-base text-rose-900 mt-2 font-mono">{toArabicNumerals(compNum2)} / {toArabicNumerals(compDen2)}</strong>
                       <span className="text-[9px] text-gray-400 block text-center">({fractionToWords(compNum2, compDen2)})</span>
                     </div>
 
@@ -520,9 +521,9 @@ export default function FractionLab({ onBack, onAddStars }: FractionLabProps) {
                       اختر الرمز الصحيح للمقارنة بين حصتي الكسرين في البيتزا بالأعلى:
                     </p>
                     <div className="flex justify-center items-center gap-2 mt-3 font-mono font-black text-xl text-amber-140">
-                      <span>{compNum1}/{compDen1}</span>
+                      <span>{toArabicNumerals(compNum1)}/{toArabicNumerals(compDen1)}</span>
                       <span className="bg-slate-700 p-1 px-3 rounded text-rose-400">؟</span>
-                      <span>{compNum2}/{compDen2}</span>
+                      <span>{toArabicNumerals(compNum2)}/{toArabicNumerals(compDen2)}</span>
                     </div>
                   </div>
 
@@ -579,15 +580,15 @@ export default function FractionLab({ onBack, onAddStars }: FractionLabProps) {
                     </div>
 
                     <p className="text-slate-650 text-[11px] leading-relaxed font-bold">
-                      أوه، تلوينك غير متطابق! الكسر الذي تلوّنه يمثّل بالصيغة <span className="text-rose-600 font-extrabold">{matchUserCount} / {matchDenominator}</span>، بينما الكسر المطلوب بالتحديد هو <span className="text-emerald-750 font-black text-sm">{matchRequired} / {matchDenominator}</span>!
+                      أوه، تلوينك غير متطابق! الكسر الذي تلوّنه يمثّل بالصيغة <span className="text-rose-600 font-extrabold">{toArabicNumerals(matchUserCount)} / {toArabicNumerals(matchDenominator)}</span>، بينما الكسر المطلوب بالتحديد هو <span className="text-emerald-750 font-black text-sm">{toArabicNumerals(matchRequired)} / {toArabicNumerals(matchDenominator)}</span>!
                     </p>
 
                     <div className="bg-white rounded-2xl p-3 border border-rose-100 space-y-2 text-[11px] font-bold text-slate-700 leading-relaxed">
                       <span className="text-[10px] text-slate-450 font-black border-b pb-1 block">شرح المدرس حسون بالمنظومة:</span>
-                      <div>- المقام هو <span className="text-rose-600">{matchDenominator}</span>: هذا يعني كعكة البيتزا مقسمة كجسم لـ {matchDenominator} قطع متساوية.</div>
-                      <div>- البسط المطلوب هو <span className="text-emerald-700">{matchRequired}</span>: يعني يجب أن نلون بقطعة الجبن والزعتر {matchRequired} أجزاء منها بالتحديد.</div>
+                      <div>- المقام هو <span className="text-rose-600">{toArabicNumerals(matchDenominator)}</span>: هذا يعني كعكة البيتزا مقسمة كجسم لـ {toArabicNumerals(matchDenominator)} قطع متساوية.</div>
+                      <div>- البسط المطلوب هو <span className="text-emerald-700">{toArabicNumerals(matchRequired)}</span>: يعني يجب أن نلون بقطعة الجبن والزعتر {toArabicNumerals(matchRequired)} أجزاء منها بالتحديد.</div>
                       <div className="bg-amber-50 p-1.5 rounded text-amber-800 text-[10px] my-1 text-center font-bold">
-                        تذكر: لون {matchRequired} قطع فقط!
+                        تذكر: لون {toArabicNumerals(matchRequired)} قطع فقط!
                       </div>
                     </div>
 
