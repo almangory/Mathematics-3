@@ -9,6 +9,7 @@ import ClockGame from './components/ClockGame';
 import GeometryGame from './components/GeometryGame';
 import AiTutor from './components/AiTutor';
 import ExamsGame from './components/ExamsGame';
+import Storybook from './components/Storybook';
 import { soundEffects } from './utils/audio';
 import { Trophy, Star, Sparkles, BookOpen, GraduationCap, ChevronLeft, Volume2 } from 'lucide-react';
 
@@ -83,6 +84,13 @@ export default function App() {
               className="mt-6 bg-[#FF6584] text-white px-6 py-3 rounded-2xl text-base font-black shadow-[0_6px_0_#d14d68] hover:shadow-[0_4px_0_#d14d68] active:translate-y-1 active:shadow-none transition-all w-full flex items-center justify-center gap-2"
             >
               <Volume2 className="w-5 h-5" /> استمع لترحيب حسون
+            </button>
+
+            <button 
+              onClick={() => handleNavigate('storybook')}
+              className="mt-3 bg-gradient-to-r from-pink-500 to-rose-500 text-white px-6 py-3.5 rounded-2xl text-base font-black border-2 border-white shadow-[0_6px_0_#9f1239] hover:shadow-[0_4px_0_#9f1239] active:translate-y-1 active:shadow-none transition-all w-full flex items-center justify-center gap-2"
+            >
+              📖 قصة المنهج التفاعلية المصورة
             </button>
 
             <button 
@@ -266,6 +274,8 @@ export default function App() {
         return <AiTutor onBack={() => handleNavigate('dashboard')} onAddStars={addStars} />;
       case 'exams':
         return <ExamsGame onBack={() => handleNavigate('dashboard')} onAddStars={addStars} />;
+      case 'storybook':
+        return <Storybook onBack={() => handleNavigate('dashboard')} onAddStars={addStars} />;
       default:
         return renderDashboard();
     }

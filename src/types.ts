@@ -1,4 +1,4 @@
-export type ActiveUnit = 'dashboard' | 'abacus' | 'multiplication' | 'division' | 'fractions' | 'clock' | 'geometry' | 'tutor' | 'exams';
+export type ActiveUnit = 'dashboard' | 'abacus' | 'multiplication' | 'division' | 'fractions' | 'clock' | 'geometry' | 'tutor' | 'exams' | 'storybook';
 
 export interface GameScore {
   stars: number;
